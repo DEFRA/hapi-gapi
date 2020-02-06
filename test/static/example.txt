@@ -1,0 +1,1 @@
+Simple text file to test page-views are not sent for static resources

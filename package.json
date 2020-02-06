@@ -1,0 +1,38 @@
+{
+  "name": "hapi-gapi",
+  "version": "0.0.1",
+  "description": "hapi plugin to enable server-side google analytics platform integration",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "lab"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@ssh.github.com:443/DEFRA/hapi-gapi"
+  },
+  "keywords": [
+    "hapi",
+    "google",
+    "analytics"
+  ],
+  "author": "Sam Gardner-Dell",
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "@hapi/joi": "^17.1.0",
+    "@hapi/wreck": "^17.0.0",
+    "debug": "^4.1.1"
+  },
+  "devDependencies": {
+    "@hapi/code": "^8.0.1",
+    "@hapi/hapi": "^19.1.0",
+    "@hapi/inert": "^6.0.1",
+    "@hapi/lab": "^22.0.3",
+    "@hapi/vision": "^6.0.0",
+    "nunjucks": "^3.2.0",
+    "sinon": "^8.1.1",
+    "standard": "^14.3.1"
+  }
+}
