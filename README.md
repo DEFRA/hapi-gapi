@@ -1,4 +1,7 @@
 # hapi-gapi
+[![Build Status](https://travis-ci.org/DEFRA/hapi-gapi.svg?branch=master)](https://travis-ci.org/DEFRA/hapi-gapi)
+[![Maintainability](https://api.codeclimate.com/v1/badges/182d4903d15c6d20fc20/maintainability)](https://codeclimate.com/github/DEFRA/hapi-gapi/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/182d4903d15c6d20fc20/test_coverage)](https://codeclimate.com/github/DEFRA/hapi-gapi/test_coverage)
 [![Licence](https://img.shields.io/badge/Licence-OGLv3-blue.svg)](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3)
 
 hapi google analytics platform integration

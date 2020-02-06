@@ -22,15 +22,15 @@
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@hapi/joi": "^17.1.0",
-    "@hapi/wreck": "^17.0.0",
+    "@hapi/wreck": "^16.0.1",
     "debug": "^4.1.1"
   },
   "devDependencies": {
-    "@hapi/code": "^8.0.1",
-    "@hapi/hapi": "^19.1.0",
-    "@hapi/inert": "^6.0.1",
-    "@hapi/lab": "^22.0.3",
-    "@hapi/vision": "^6.0.0",
+    "@hapi/code": "^7.0.0",
+    "@hapi/hapi": "^18.4.0",
+    "@hapi/inert": "^5.2.2",
+    "@hapi/lab": "^21.0.0",
+    "@hapi/vision": "^5.5.4",
     "nunjucks": "^3.2.0",
     "sinon": "^8.1.1",
     "standard": "^14.3.1"
