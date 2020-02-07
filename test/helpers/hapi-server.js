@@ -67,6 +67,14 @@ module.exports = {
       }
     })
 
+    server.route({
+      method: 'GET',
+      path: '/boom',
+      handler: (request, h) => {
+        return h.response('test').code(500)
+      }
+    })
+
     await server.start()
     console.log('Server running on %s', server.info.uri)
   },

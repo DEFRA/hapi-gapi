@@ -25,7 +25,7 @@ describe('Hapi Plugin', () => {
     sinon.restore()
   })
 
-  it('handles 2xx page views', { timeout: 30000 }, () => {
+  it('handles 2xx page views', { timeout: 3000 }, () => {
     return new Promise((resolve) => {
       sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
         const hit = querystring.parse(options.payload)
@@ -45,7 +45,7 @@ describe('Hapi Plugin', () => {
     })
   })
 
-  it('does not generate page views for static resources', { timeout: 5000 }, () => {
+  it('does not generate page views for static resources', { timeout: 3000 }, () => {
     return new Promise((resolve, reject) => {
       sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
         const msg = 'Unexpected request to the google measurement protocol api: should not send hits for static resources'
@@ -55,7 +55,21 @@ describe('Hapi Plugin', () => {
       hapiTestServer.inject({ method: 'GET', url: '/example.txt' })
 
       // Wait a few seconds to allow the internal batch interval to fire
-      setTimeout(resolve, 4000)
+      setTimeout(resolve, 2500)
+    })
+  })
+
+  it('does not generate page views on 5xx errors', { timeout: 3000 }, () => {
+    return new Promise((resolve, reject) => {
+      sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
+        const msg = 'Unexpected request to the google measurement protocol api: should not send hits for server errors'
+        Code.fail(msg)
+        reject(new Error(msg))
+      })
+      hapiTestServer.inject({ method: 'GET', url: '/boom' })
+
+      // Wait a few seconds to allow the internal batch interval to fire
+      setTimeout(resolve, 2500)
     })
   })
 })
