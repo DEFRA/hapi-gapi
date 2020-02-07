@@ -19,7 +19,7 @@ const ECOMMERCE_TEST_PRODUCTS = [
     category: 'product1category',
     variant: 'product1variant',
     quantity: 'product1quantity',
-    price: 'product1price'
+    price: 1.1
   },
   {
     id: 'product2',
@@ -28,7 +28,7 @@ const ECOMMERCE_TEST_PRODUCTS = [
     category: 'product2category',
     variant: 'product2variant',
     quantity: 'product2quantity',
-    price: 'product2price'
+    price: 2.2
   }
 ]
 const DEFAULT_REQUEST_OBJ = {
@@ -73,21 +73,24 @@ const testDefaultHitAssertions = (method, url, options) => {
   return hit
 }
 
-const testDefaultEcommerceProductAssertions = (hit) => {
+const testDefaultEcommerceProductAssertions = (hit, eventAction) => {
+  expect(hit.ec).to.equal('ecommerce')
+  expect(hit.ea).to.equal(eventAction)
+  expect(hit.ev).to.equal((ECOMMERCE_TEST_PRODUCTS[0].price + ECOMMERCE_TEST_PRODUCTS[1].price).toFixed(2))
   expect(hit.pr1id).to.equal(ECOMMERCE_TEST_PRODUCTS[0].id)
   expect(hit.pr1nm).to.equal(ECOMMERCE_TEST_PRODUCTS[0].name)
   expect(hit.pr1br).to.equal(ECOMMERCE_TEST_PRODUCTS[0].brand)
   expect(hit.pr1ca).to.equal(ECOMMERCE_TEST_PRODUCTS[0].category)
   expect(hit.pr1va).to.equal(ECOMMERCE_TEST_PRODUCTS[0].variant)
   expect(hit.pr1qt).to.equal(ECOMMERCE_TEST_PRODUCTS[0].quantity)
-  expect(hit.pr1pr).to.equal(ECOMMERCE_TEST_PRODUCTS[0].price)
+  expect(hit.pr1pr).to.equal(ECOMMERCE_TEST_PRODUCTS[0].price.toFixed(2))
   expect(hit.pr2id).to.equal(ECOMMERCE_TEST_PRODUCTS[1].id)
   expect(hit.pr2nm).to.equal(ECOMMERCE_TEST_PRODUCTS[1].name)
   expect(hit.pr2br).to.equal(ECOMMERCE_TEST_PRODUCTS[1].brand)
   expect(hit.pr2ca).to.equal(ECOMMERCE_TEST_PRODUCTS[1].category)
   expect(hit.pr2va).to.equal(ECOMMERCE_TEST_PRODUCTS[1].variant)
   expect(hit.pr2qt).to.equal(ECOMMERCE_TEST_PRODUCTS[1].quantity)
-  expect(hit.pr2pr).to.equal(ECOMMERCE_TEST_PRODUCTS[1].price)
+  expect(hit.pr2pr).to.equal(ECOMMERCE_TEST_PRODUCTS[1].price.toFixed(2))
   return hit
 }
 
@@ -168,7 +171,7 @@ describe('Analytics', () => {
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.pa).to.equal('detail')
-      testDefaultEcommerceProductAssertions(hit)
+      testDefaultEcommerceProductAssertions(hit, 'productView')
     })
     analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().detail(ECOMMERCE_TEST_PRODUCTS)
   })
@@ -178,7 +181,7 @@ describe('Analytics', () => {
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.pa).to.equal('add')
-      testDefaultEcommerceProductAssertions(hit)
+      testDefaultEcommerceProductAssertions(hit, 'addToCart')
     })
     analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().add(ECOMMERCE_TEST_PRODUCTS)
   })
@@ -188,7 +191,7 @@ describe('Analytics', () => {
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.pa).to.equal('remove')
-      testDefaultEcommerceProductAssertions(hit)
+      testDefaultEcommerceProductAssertions(hit, 'removeFromCart')
     })
     analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().remove(ECOMMERCE_TEST_PRODUCTS)
   })
@@ -200,7 +203,7 @@ describe('Analytics', () => {
       expect(hit.pa).to.equal('checkout')
       expect(hit.cos).to.equal('1')
       expect(hit.col).to.equal('visa')
-      testDefaultEcommerceProductAssertions(hit)
+      testDefaultEcommerceProductAssertions(hit, 'checkout')
     })
     analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().checkout(ECOMMERCE_TEST_PRODUCTS, 1, 'visa')
   })
@@ -212,9 +215,20 @@ describe('Analytics', () => {
       expect(hit.pa).to.equal('purchase')
       expect(hit.ti).to.equal('transactionId')
       expect(hit.ta).to.equal('affiliate_code')
-      testDefaultEcommerceProductAssertions(hit)
+      testDefaultEcommerceProductAssertions(hit, 'purchase')
     })
     analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().purchase(ECOMMERCE_TEST_PRODUCTS, 'transactionId', 'affiliate_code')
+  })
+
+  it('handles enhanced ecommerce product refunds', () => {
+    const analytics = new Analytics({ gaPropertyId: TEST_PROPERTY, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
+    sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
+      const hit = testDefaultHitAssertions(method, url, options)
+      expect(hit.pa).to.equal('refund')
+      expect(hit.ti).to.equal('transactionId')
+      testDefaultEcommerceProductAssertions(hit, 'refund')
+    })
+    analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().refund(ECOMMERCE_TEST_PRODUCTS, 'transactionId')
   })
 
   it('handles hits in batch', { timeout: 5000 }, () => {
