@@ -36,7 +36,16 @@ const server = Hapi.server({
 await server.register({
   plugin: HapiGapi,
   options: {
-    gaPropertyId: 'UA-XXXXXX-X',
+    propertySettings: [
+      {
+        id: 'UA-XXXXXX-XX',
+        hitTypes: ['pageview', 'event', 'ecommerce']
+      },
+      {
+        id: 'UA-YYYYYY-YY',
+        hitTypes: ['pageview']
+      }
+    ], 
     sessionIdProducer: (request) => {
       // Would normally use the request object to retrieve the proper session identifier
       return 'test-session'
@@ -82,7 +91,7 @@ request.ga.event({
   category: 'Event category',
   action: 'Event action',
   label: 'Event label',
-  value: 123,
+  value: 123
 })
 ```
 
@@ -95,8 +104,8 @@ const products = [
      brand: 'product1brand',
      category: 'product1category',
      variant: 'product1variant',
-     quantity: 'product1quantity',
-     price: 'product1price'
+     quantity: 1,
+     price: 123.45
   }
 ]
 // Send a product view

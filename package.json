@@ -1,6 +1,6 @@
 {
   "name": "hapi-gapi",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "hapi plugin to enable server-side google analytics platform integration",
   "main": "lib/index.js",
   "directories": {
@@ -23,7 +23,8 @@
   "dependencies": {
     "@hapi/joi": "^17.1.0",
     "@hapi/wreck": "^16.0.1",
-    "debug": "^4.1.1"
+    "debug": "^4.1.1",
+    "ip-anonymize": "^0.1.0"
   },
   "devDependencies": {
     "@hapi/code": "^7.0.0",
