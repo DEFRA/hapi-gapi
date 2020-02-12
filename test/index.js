@@ -71,7 +71,7 @@ describe('Hapi Plugin', () => {
     })
   })
 
-  it.only('anonymises ipv6 addresses', { timeout: 3000 }, () => {
+  it('anonymises ipv6 addresses', { timeout: 3000 }, () => {
     return new Promise((resolve) => {
       sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
         expect(method).to.equal('post')
