@@ -43,9 +43,7 @@ module.exports = {
         html: {
           compile: (src, options) => {
             const template = Nunjucks.compile(src, options.environment)
-            return context => {
-              return template.render(context)
-            }
+            return context => template.render(context)
           },
           prepare: (options, next) => {
             options.compileOptions.environment = Nunjucks.configure(options.path, { watch: false })
@@ -70,16 +68,16 @@ module.exports = {
     server.route({
       method: 'GET',
       path: '/boom',
-      handler: (request, h) => {
-        return h.response('test').code(500)
-      }
+      handler: (request, h) => h.response('test').code(500)
     })
 
     await server.start()
     console.log('Server running on %s', server.info.uri)
   },
   stop: async () => {
-    if (server) await server.stop()
+    if (server) {
+      await server.stop()
+    }
   },
   inject: async options => server.inject(options)
 }
