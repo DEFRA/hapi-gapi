@@ -7,7 +7,7 @@ const HapiGapi = require('../../lib/index')
 
 let server
 module.exports = {
-  start: async (hapiGapiOptions) => {
+  start: async hapiGapiOptions => {
     server = Hapi.server({
       host: 'localhost',
       port: 33000,
@@ -43,7 +43,7 @@ module.exports = {
         html: {
           compile: (src, options) => {
             const template = Nunjucks.compile(src, options.environment)
-            return (context) => {
+            return context => {
               return template.render(context)
             }
           },
@@ -81,5 +81,5 @@ module.exports = {
   stop: async () => {
     if (server) await server.stop()
   },
-  inject: async (options) => server.inject(options)
+  inject: async options => server.inject(options)
 }

@@ -2,7 +2,7 @@ const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 const sinon = require('sinon')
 const { expect } = Code
-const { afterEach, describe, it } = exports.lab = Lab.script()
+const { afterEach, describe, it } = (exports.lab = Lab.script())
 const wreck = require('@hapi/wreck')
 
 const Analytics = require('../lib/analytics')
@@ -48,7 +48,7 @@ const DEFAULT_REQUEST_OBJ = {
   path: '/some/endpoint'
 }
 
-const TEST_DEFAULT_ATTRIBUTION = (request) => {
+const TEST_DEFAULT_ATTRIBUTION = request => {
   expect(request).to.be.an.object()
   expect(request.path).to.be.a.string()
   expect(request.headers).to.be.an.object()
@@ -107,7 +107,12 @@ describe('Analytics', () => {
   })
 
   it('handles page views', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_NO_ATTRIBUTION, batchSize: 1 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION,
+      batchSize: 1
+    })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.cn).to.not.exist()
@@ -123,7 +128,12 @@ describe('Analytics', () => {
   })
 
   it('handles page views with attribution', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.cn).to.equal('attribution_campaign')
@@ -139,7 +149,12 @@ describe('Analytics', () => {
   })
 
   it('handles events', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
 
     const testEvent = {
       category: 'event_category',
@@ -162,49 +177,87 @@ describe('Analytics', () => {
   })
 
   it('throws on invalid events', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
-    expect(analytics.ga(DEFAULT_REQUEST_OBJ).event({
-      category: 'event_category',
-      action: null
-    })).reject()
-    expect(analytics.ga(DEFAULT_REQUEST_OBJ).event({
-      category: null,
-      action: 'event_action'
-    })).reject()
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
+    expect(
+      analytics.ga(DEFAULT_REQUEST_OBJ).event({
+        category: 'event_category',
+        action: null
+      })
+    ).reject()
+    expect(
+      analytics.ga(DEFAULT_REQUEST_OBJ).event({
+        category: null,
+        action: 'event_action'
+      })
+    ).reject()
   })
 
   it('handles enhanced ecommerce product detail views', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.pa).to.equal('detail')
       testDefaultEcommerceProductAssertions(hit, 'productView')
     })
-    analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().detail(ECOMMERCE_TEST_PRODUCTS)
+    analytics
+      .ga(DEFAULT_REQUEST_OBJ)
+      .ecommerce()
+      .detail(ECOMMERCE_TEST_PRODUCTS)
   })
 
   it('handles enhanced ecommerce product add to cart', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.pa).to.equal('add')
       testDefaultEcommerceProductAssertions(hit, 'addToCart')
     })
-    analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().add(ECOMMERCE_TEST_PRODUCTS)
+    analytics
+      .ga(DEFAULT_REQUEST_OBJ)
+      .ecommerce()
+      .add(ECOMMERCE_TEST_PRODUCTS)
   })
 
   it('handles enhanced ecommerce product remove from cart', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.pa).to.equal('remove')
       testDefaultEcommerceProductAssertions(hit, 'removeFromCart')
     })
-    analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().remove(ECOMMERCE_TEST_PRODUCTS)
+    analytics
+      .ga(DEFAULT_REQUEST_OBJ)
+      .ecommerce()
+      .remove(ECOMMERCE_TEST_PRODUCTS)
   })
 
   it('handles enhanced ecommerce product checkouts', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.pa).to.equal('checkout')
@@ -212,11 +265,19 @@ describe('Analytics', () => {
       expect(hit.col).to.equal('visa')
       testDefaultEcommerceProductAssertions(hit, 'checkout')
     })
-    analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().checkout(ECOMMERCE_TEST_PRODUCTS, 1, 'visa')
+    analytics
+      .ga(DEFAULT_REQUEST_OBJ)
+      .ecommerce()
+      .checkout(ECOMMERCE_TEST_PRODUCTS, 1, 'visa')
   })
 
   it('handles enhanced ecommerce product purchases', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.pa).to.equal('purchase')
@@ -224,23 +285,40 @@ describe('Analytics', () => {
       expect(hit.ta).to.equal('affiliate_code')
       testDefaultEcommerceProductAssertions(hit, 'purchase')
     })
-    analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().purchase(ECOMMERCE_TEST_PRODUCTS, 'transactionId', 'affiliate_code')
+    analytics
+      .ga(DEFAULT_REQUEST_OBJ)
+      .ecommerce()
+      .purchase(ECOMMERCE_TEST_PRODUCTS, 'transactionId', 'affiliate_code')
   })
 
   it('handles enhanced ecommerce product refunds', () => {
-    const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_DEFAULT_ATTRIBUTION, batchSize: 1 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
       expect(hit.pa).to.equal('refund')
       expect(hit.ti).to.equal('transactionId')
       testDefaultEcommerceProductAssertions(hit, 'refund')
     })
-    analytics.ga(DEFAULT_REQUEST_OBJ).ecommerce().refund(ECOMMERCE_TEST_PRODUCTS, 'transactionId')
+    analytics
+      .ga(DEFAULT_REQUEST_OBJ)
+      .ecommerce()
+      .refund(ECOMMERCE_TEST_PRODUCTS, 'transactionId')
   })
 
   it('handles hits in batch', { timeout: 5000 }, () => {
-    return new Promise((resolve) => {
-      const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_NO_ATTRIBUTION, batchSize: 20, batchInterval: 1000 })
+    return new Promise(resolve => {
+      const analytics = new Analytics({
+        propertySettings: TEST_PROPERTY_SETTINGS,
+        sessionIdProducer: TEST_SESSION,
+        attributionProducer: TEST_NO_ATTRIBUTION,
+        batchSize: 20,
+        batchInterval: 1000
+      })
       sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
         const hits = options.payload.split('\n')
         expect(hits).to.be.an.array()
@@ -261,8 +339,14 @@ describe('Analytics', () => {
   })
 
   it('does not make unnecessary requests to the api', { timeout: 5000 }, () => {
-    return new Promise((resolve) => {
-      const analytics = new Analytics({ propertySettings: TEST_PROPERTY_SETTINGS, sessionIdProducer: TEST_SESSION, attributionProducer: TEST_NO_ATTRIBUTION, batchSize: 20, batchInterval: 1000 })
+    return new Promise(resolve => {
+      const analytics = new Analytics({
+        propertySettings: TEST_PROPERTY_SETTINGS,
+        sessionIdProducer: TEST_SESSION,
+        attributionProducer: TEST_NO_ATTRIBUTION,
+        batchSize: 20,
+        batchInterval: 1000
+      })
       sinon.stub(wreck, 'request').callsFake(() => {
         Code.fail('Unexpected request to the google measurement protocol api, no hits queued!')
       })

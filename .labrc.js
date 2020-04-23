@@ -8,4 +8,3 @@ module.exports = {
   reporter: ['console', 'html', 'lcov'],
   output: ['stdout', 'coverage/coverage.html', 'coverage/lcov.info']
 }
-

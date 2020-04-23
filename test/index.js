@@ -5,13 +5,13 @@ const wreck = require('@hapi/wreck')
 const querystring = require('querystring')
 const hapiTestServer = require('./helpers/hapi-server')
 const { expect } = Code
-const { before, after, afterEach, describe, it } = exports.lab = Lab.script()
+const { before, after, afterEach, describe, it } = (exports.lab = Lab.script())
 
 describe('Hapi Plugin', () => {
   before(async () => {
     await hapiTestServer.start({
       propertySettings: [{ id: 'UA-XXXXXX', hitTypes: ['pageview'] }],
-      sessionIdProducer: (request) => 'test-session',
+      sessionIdProducer: request => 'test-session',
       batchSize: 1,
       batchInterval: 1000
     })
@@ -26,7 +26,7 @@ describe('Hapi Plugin', () => {
   })
 
   it('handles 2xx page views', { timeout: 3000 }, () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
         expect(method).to.equal('post')
         expect(url).to.equal('https://www.google-analytics.com/batch')
@@ -51,7 +51,7 @@ describe('Hapi Plugin', () => {
   })
 
   it('anonymises ipv4 addresses', { timeout: 3000 }, () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
         expect(method).to.equal('post')
         expect(url).to.equal('https://www.google-analytics.com/batch')
@@ -72,7 +72,7 @@ describe('Hapi Plugin', () => {
   })
 
   it('anonymises ipv6 addresses', { timeout: 3000 }, () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
         expect(method).to.equal('post')
         expect(url).to.equal('https://www.google-analytics.com/batch')
@@ -149,21 +149,29 @@ describe('Hapi Plugin Registration Options', () => {
   })
 
   it('requires propertySettings to contain a property with a hitTypes array containing at least 1 type', async () => {
-    await expect(hapiTestServer.start({ propertySettings: [{ id: 'UA-XXXXXX-XX', hitTypes: [] }] })).reject('"propertySettings[0].hitTypes" must contain at least 1 items')
+    await expect(hapiTestServer.start({ propertySettings: [{ id: 'UA-XXXXXX-XX', hitTypes: [] }] })).reject(
+      '"propertySettings[0].hitTypes" must contain at least 1 items'
+    )
   })
 
   it('requires propertySettings to contain a property with a hitTypes array containing at least 1 type', async () => {
-    await expect(hapiTestServer.start({ propertySettings: [{ id: 'UA-XXXXXX-XX', hitTypes: ['invalid'] }] })).reject('"propertySettings[0].hitTypes[0]" does not match any of the allowed types')
+    await expect(hapiTestServer.start({ propertySettings: [{ id: 'UA-XXXXXX-XX', hitTypes: ['invalid'] }] })).reject(
+      '"propertySettings[0].hitTypes[0]" does not match any of the allowed types'
+    )
   })
 
   it('throws if session id producer function is not defined', async () => {
-    await expect(hapiTestServer.start({ propertySettings: [{ id: 'UA-XXXXXX-XX', hitTypes: ['pageview', 'event', 'ecommerce'] }] })).reject('"sessionIdProducer" is required')
+    await expect(hapiTestServer.start({ propertySettings: [{ id: 'UA-XXXXXX-XX', hitTypes: ['pageview', 'event', 'ecommerce'] }] })).reject(
+      '"sessionIdProducer" is required'
+    )
   })
 
   it('throws if session id producer function does not accept request as an argument', async () => {
-    await expect(hapiTestServer.start({
-      propertySettings: [{ id: 'UA-XXXXXX-XX', hitTypes: ['pageview', 'event', 'ecommerce'] }],
-      sessionIdProducer: () => {}
-    })).reject('"sessionIdProducer" must have an arity of 1')
+    await expect(
+      hapiTestServer.start({
+        propertySettings: [{ id: 'UA-XXXXXX-XX', hitTypes: ['pageview', 'event', 'ecommerce'] }],
+        sessionIdProducer: () => {}
+      })
+    ).reject('"sessionIdProducer" must have an arity of 1')
   })
 })
