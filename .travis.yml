@@ -1,15 +1,20 @@
 os: linux
+dist: bionic
 language: node_js
 node_js:
-  - "10"
-  - "12"
-cache:
-  directories:
-    - "node_modules"
-before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
+  - '10'
+  - '12'
+  - '14'
+cache: npm
+git:
+  depth: false
 
-after_script:
-  - ./cc-test-reporter after-build -t lcov --exit-code $TRAVIS_TEST_RESULT
+script:
+  - npm test
+  - sonar-scanner
+
+addons:
+  sonarcloud:
+    organization: 'defra'
+    token:
+      secure: CE/UwzJtyHSq/m/lrFcWTu45Y5C4RWWQ6SKQ31j36Q3l5+Q/a5gEaGSx7CyacIucjrRBqWj7qQdl0KWh4knL+X/hwY3vG7dR3hpfmoZ9M91UMUgQjfs50V+SRkofeVQ5RyZPvZ1T4xqFpIapQkjqF0Gf4S+OEMRWE8hp425ws0Jd3OjOWVbA52wejq4ckz9xOoitFYMErVpU65p0KDQvnhjrk88r0Iawm45PfxytC4o1ecfwwAqHIdF0cnX8e51qf0+7oDVq9Dgner4bPL8M+1oo3b6he+WjmcPhAU6C4LrY0X3PjSzisb30wJ4CRw7xdBIO/65RDtsW7kTjk49hhRsyiuZQRx4YpGf03314vaUg98Mf3+OseBYIZ+j78Ih4uLtui3SG3qW8no+d/DPjOSivOMiqBgUyks+Chj4JAaYg9mcpFbFjwsC8lwcBtfls9ZKkfIJecMix/U//RIpiXjh/qemLziO3HLS8cX1fSZAHDhQQt74vb44mXPqHKrDRdCrHm89W6OlswvpLLq7CMXiUhiPW8xeQNgaTedW5F42/n3ampjAE8l+2nZZ42Q2Ubwtd0MgtGyXtKITYay5PtwTJLP6Sw6pViDBKLvUZQdk1eXALIcTWFFd2HScokkXMGNHHNZWcn/dohj0elHSoSZzq6VegdIO3fYgl5ee7BdM=

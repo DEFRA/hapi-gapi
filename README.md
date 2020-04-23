@@ -1,29 +1,49 @@
 # hapi-gapi
+
 [![Build Status](https://travis-ci.org/DEFRA/hapi-gapi.svg?branch=master)](https://travis-ci.org/DEFRA/hapi-gapi)
-[![Maintainability](https://api.codeclimate.com/v1/badges/182d4903d15c6d20fc20/maintainability)](https://codeclimate.com/github/DEFRA/hapi-gapi/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/182d4903d15c6d20fc20/test_coverage)](https://codeclimate.com/github/DEFRA/hapi-gapi/test_coverage)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=alert_status)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=security_rating)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=ncloc)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=coverage)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=bugs)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=code_smells)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=sqale_index)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_hapi-gapi&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=DEFRA_hapi-gapi)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![Dependabot](https://api.dependabot.com/badges/status?host=github&repo=DEFRA/hapi-gapi)](https://dependabot.com/)
+[![GitHub issues](https://img.shields.io/github/issues/DEFRA/hapi-gapi.svg)](https://github.com/DEFRA/rod-licensing/issues/)
+[![Code size](https://img.shields.io/github/languages/code-size/DEFRA/hapi-gapi.svg)]()
+[![Repo size](https://img.shields.io/github/repo-size/DEFRA/hapi-gapi.svg)]()
 [![Licence](https://img.shields.io/badge/Licence-OGLv3-blue.svg)](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3)
 
 hapi google analytics platform integration
 
 ## Cloning
+
 Cloning via SSH from behind a firewall which blocks port 22:
+
 ```
 git clone ssh://git@ssh.github.com:443/DEFRA/hapi-gapi
 ```
 
 ## Installing the plugin
+
 Via github:
+
 ```
 npm install --save https://github.com/DEFRA/hapi-gapi.git#master
 ```
 
 To use a specific commit/version, install as follows:
+
 ```
 npm install --save https://github.com/DEFRA/hapi-gapi.git#commit_or_version
 ```
 
 ## Registering the plugin with hapi
+
 ```javascript
 const Hapi = require('@hapi/hapi')
 const HapiGapi = require('hapi-gapi')
@@ -45,21 +65,21 @@ await server.register({
         id: 'UA-YYYYYY-YY',
         hitTypes: ['pageview']
       }
-    ], 
-    sessionIdProducer: (request) => {
+    ],
+    sessionIdProducer: request => {
       // Would normally use the request object to retrieve the proper session identifier
       return 'test-session'
     },
-    attributionProducer: (request) => {
+    attributionProducer: request => {
       // Would normally use the request object to return any attribution associated with the user's session
       return {
         campaign: 'attribution_campaign',
         source: 'attribution_source',
         medium: 'attribution_medium',
         content: 'attribution_content',
-        term: 'attribution_term'    
+        term: 'attribution_term'
       }
-    }, 
+    },
     batchSize: 20,
     batchInterval: 15000
   }
@@ -77,17 +97,21 @@ process.on('SIGTERM', shutdown)
 ```
 
 ## How to use
+
 This plugin decorates the request object so that you can easily send data to Google Analytics as per the following examples:
 
 ### Page views
+
 ```javascript
-request.ga.pageView()
+await request.ga.pageView()
 ```
-__NOTE: By default this is not necessary, the plugin will automatically send page-views by hooking into the onPreResponse lifecycle hook__
+
+**NOTE: By default this is not necessary, the plugin will automatically send page-views by hooking into the onPreResponse lifecycle hook**
 
 ### Events
+
 ```javascript
-request.ga.event({
+await request.ga.event({
   category: 'Event category',
   action: 'Event action',
   label: 'Event label',
@@ -96,26 +120,27 @@ request.ga.event({
 ```
 
 ### Enhanced Ecommerce
+
 ```javascript
 const products = [
   {
-     id: 'product1',
-     name: 'product1name',
-     brand: 'product1brand',
-     category: 'product1category',
-     variant: 'product1variant',
-     quantity: 1,
-     price: 123.45
+    id: 'product1',
+    name: 'product1name',
+    brand: 'product1brand',
+    category: 'product1category',
+    variant: 'product1variant',
+    quantity: 1,
+    price: 123.45
   }
 ]
 // Send a product view
-request.ga.ecommerce().detail(products)
+await request.ga.ecommerce().detail(products)
 // Add to cart
-request.ga.ecommerce().add(products)
+await request.ga.ecommerce().add(products)
 // Commence checkout - second two parameters (step number and option) are optional
-request.ga.ecommerce().checkout(products, 1, 'Visa')
+await request.ga.ecommerce().checkout(products, 1, 'Visa')
 // Purchase (affiliation is optional)
-request.ga.ecommerce().purchase(products, 'transaction-identifier', 'affiliation')
+await request.ga.ecommerce().purchase(products, 'transaction-identifier', 'affiliation')
 ```
 
 ## Contributing to this project
@@ -132,7 +157,7 @@ http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3
 
 The following attribution statement MUST be cited in your products and applications when using this information.
 
->Contains public sector information licensed under the Open Government license v3
+> Contains public sector information licensed under the Open Government license v3
 
 ### About the license
 
