@@ -37,7 +37,7 @@
     "nunjucks": "^3.2.1",
     "prettier-standard": "^16.3.0",
     "sinon": "^9.0.2",
-    "standard": "^14.3.3"
+    "standard": "^14.3.4"
   },
   "prettier": {
     "printWidth": 140
