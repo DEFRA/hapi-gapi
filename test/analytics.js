@@ -127,6 +127,28 @@ describe('Analytics', () => {
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
   })
 
+  it('session id producer is not called if propertySettings is empty', () => {
+    const sessionIdProducer = sinon.spy(r => {})
+    const analytics = new Analytics({
+      propertySettings: [],
+      sessionIdProducer,
+      attributionProducer: r => {}
+    })
+    analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
+    expect(sessionIdProducer.callCount).to.equal(0)
+  })
+
+  it('attribution producer is not called if propertySettings is empty', () => {
+    const attributionProducer = sinon.spy(r => {})
+    const analytics = new Analytics({
+      propertySettings: [],
+      sessionIdProducer: r => {},
+      attributionProducer
+    })
+    analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
+    expect(attributionProducer.callCount).to.equal(0)
+  })
+
   it('handles page views with attribution', () => {
     const analytics = new Analytics({
       propertySettings: TEST_PROPERTY_SETTINGS,

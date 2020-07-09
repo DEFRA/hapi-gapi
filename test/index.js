@@ -140,8 +140,8 @@ describe('Hapi Plugin Registration Options', () => {
     await expect(hapiTestServer.start({ propertySettings: {} })).reject('"propertySettings" must be an array')
   })
 
-  it('requires propertySettings to be an array with at least one property object', async () => {
-    await expect(hapiTestServer.start({ propertySettings: [] })).reject('"propertySettings" does not contain 1 required value(s)')
+  it('allows propertySettings to be an empty array', async () => {
+    await expect(hapiTestServer.start({ propertySettings: [], sessionIdProducer: r => {}, attributionProducer: r => {} })).not.reject()
   })
 
   it('requires propertySettings to contain a property with a valid id', async () => {

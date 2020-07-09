@@ -1,6 +1,6 @@
 {
   "name": "hapi-gapi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "hapi plugin to enable server-side google analytics platform integration",
   "main": "lib/index.js",
   "directories": {
