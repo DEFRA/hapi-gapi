@@ -1,6 +1,6 @@
 {
-  "name": "hapi-gapi",
-  "version": "0.2.0",
+  "name": "@defra/hapi-gapi",
+  "version": "1.0.0",
   "description": "hapi plugin to enable server-side google analytics platform integration",
   "main": "lib/index.js",
   "directories": {
@@ -27,17 +27,17 @@
     "ip-anonymize": "^0.1.0"
   },
   "devDependencies": {
-    "@hapi/code": "7.0.0",
-    "@hapi/hapi": "18.4.1",
-    "@hapi/inert": "5.2.2",
-    "@hapi/lab": "21.0.0",
-    "@hapi/vision": "5.5.4",
+    "@hapi/code": "8.0.1",
+    "@hapi/hapi": "19.2.0",
+    "@hapi/inert": "6.0.1",
+    "@hapi/lab": "22.0.5",
+    "@hapi/vision": "6.0.0",
     "husky": "^4.2.5",
-    "lint-staged": "^10.1.7",
-    "nunjucks": "^3.2.1",
-    "prettier-standard": "^16.3.0",
+    "lint-staged": "^10.2.11",
+    "nunjucks": "^3.2.2",
+    "prettier-standard": "^16.4.1",
     "sinon": "^9.0.2",
-    "standard": "^14.3.3"
+    "standard": "^14.3.4"
   },
   "prettier": {
     "printWidth": 140
@@ -51,6 +51,9 @@
     "hooks": {
       "pre-commit": "npm run test && lint-staged"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "lint-staged": {
     "*": [
