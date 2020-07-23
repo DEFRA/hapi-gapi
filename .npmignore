@@ -1,0 +1,8 @@
+.*
+sonar-project.properties
+_config.yml
+test/
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
