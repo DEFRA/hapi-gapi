@@ -30,29 +30,15 @@ git clone ssh://git@ssh.github.com:443/DEFRA/hapi-gapi
 
 ## Installing the plugin
 
-Via npm.js:
-
 ```
 npm install --save @defra/hapi-gapi
-```
-
-Via github:
-
-```
-npm install --save https://github.com/DEFRA/hapi-gapi.git#master
-```
-
-To use a specific commit/version, install as follows:
-
-```
-npm install --save https://github.com/DEFRA/hapi-gapi.git#commit_or_version
 ```
 
 ## Registering the plugin with hapi
 
 ```javascript
 const Hapi = require('@hapi/hapi')
-const HapiGapi = require('hapi-gapi')
+const HapiGapi = require('@defra/hapi-gapi')
 
 const server = Hapi.server({
   host: 'localhost',
@@ -102,13 +88,13 @@ process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 ```
 
-| Option              | Description                                                                                                                                                                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| propertySettings    | Defines the Google Analytics properties and the type of hits which are allowed to be sent to each. If empty, analytics data is not recorded (useful if you want to enable/disable via environment variables but still want the request decorated |  |
-| sessionIdProducer   | A method to retrieve an identifier to differentiate each user session                                                                                                                                                                            |
-| attributionProducer | A method to retrieve any attribution associated with the user session to enable campaign tracking as per https://support.google.com/analytics/answer/1033863?hl=en                                                                               |
-| batchSize           | (Optional) The maximum number of hits to buffer before sending a request to the Google Analytics API. 20 is the maximum number of hits that the API will accept in batch                                                                         |
-| batchInterval       | (Optional) The maximum time (in ms) before sending any recorded hits to the Google Analytics API.                                                                                                                                                |
+| Option              | Description                                                                                                                                                                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| propertySettings    | Defines the Google Analytics properties and the type of hits which are allowed to be sent to each. If empty, analytics data is not recorded (useful if you want to enable/disable via environment variables but still want the request decorated) |
+| sessionIdProducer   | A method to retrieve an identifier to differentiate each user session                                                                                                                                                                             |
+| attributionProducer | (Optional) A method to retrieve any attribution associated with the user session to enable campaign tracking as per https://support.google.com/analytics/answer/1033863?hl=en                                                                     |
+| batchSize           | (Optional) The maximum number of hits to buffer before sending a request to the Google Analytics API. 20 is the maximum number of hits that the API will accept in batch                                                                          |
+| batchInterval       | (Optional) The maximum time (in ms) before sending any recorded hits to the Google Analytics API.                                                                                                                                                 |
 
 ## How to use
 
@@ -132,6 +118,8 @@ await request.ga.event({
   value: 123
 })
 ```
+
+> The label and value arguments are optional
 
 ### Enhanced Ecommerce
 
