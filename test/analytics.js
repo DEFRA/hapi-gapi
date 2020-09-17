@@ -147,6 +147,29 @@ describe('Analytics', () => {
     })
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
     expect(attributionProducer.callCount).to.equal(0)
+  });
+
+  ([
+    { desc: 'cn and cs specified', test: { campaign: 'cn1', source: 'cs' }, res: true },
+    { desc: 'cn and ci specified', test: { campaign: 'cn2', id: 'cid2' }, res: true },
+    { desc: 'cn omitted', test: { source: 'cs', id: 'cid3' }, res: false },
+    { desc: 'cs and ci omitted', test: { campaign: 'cn1' }, res: false }
+  ]).forEach(({ desc, test, res }) => {
+    it(`validates that return value of attribution producer has a cn value and one of cm or cs (${desc})`, async () => {
+      const attributionProducer = () => test
+      const analytics = new Analytics({
+        propertySettings: TEST_PROPERTY_SETTINGS,
+        sessionIdProducer: r => {},
+        attributionProducer
+      })
+      if (res) {
+        await expect(analytics.ga(DEFAULT_REQUEST_OBJ).pageView()).not.reject()
+      } else {
+        await expect(analytics.ga(DEFAULT_REQUEST_OBJ).pageView()).reject(
+          'Attribution should contain campaign and one of source or id'
+        )
+      }
+    })
   })
 
   it('handles page views with attribution', () => {
