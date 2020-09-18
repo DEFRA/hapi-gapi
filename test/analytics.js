@@ -150,10 +150,16 @@ describe('Analytics', () => {
   })
 
   ;[
-    { desc: 'cn and cs specified', test: { campaign: 'cn1', source: 'cs' }, res: true },
-    { desc: 'cn and ci specified', test: { campaign: 'cn2', id: 'cid2' }, res: true },
-    { desc: 'cn omitted', test: { source: 'cs', id: 'cid3' }, res: false },
-    { desc: 'cs and ci omitted', test: { campaign: 'cn1' }, res: false }
+    { desc: 'campaign and source specified', test: { campaign: 'cn1', source: 'cs' }, res: true },
+    { desc: 'campaign and id specified', test: { campaign: 'cn2', id: 'cid2' }, res: true },
+    { desc: 'campaign omitted', test: { source: 'cs', id: 'cid3' }, res: false },
+    { desc: 'source and id omitted', test: { campaign: 'cn1' }, res: false },
+    { desc: 'campaign specified but zero length', test: { campaign: '', source: 'cs' }, res: false },
+    { desc: 'campaign specified but just spaces', test: { campaign: '   ', source: 'cs' }, res: false },
+    { desc: 'source specified but zero length', test: { campaign: 'cn1', source: '' }, res: false },
+    { desc: 'source specified but just spaces', test: { campaign: 'cn1', source: '   ' }, res: false },
+    { desc: 'id specified but zero length', test: { campaign: 'cn1', id: '' }, res: false },
+    { desc: 'id specified but just spaces', test: { campaign: 'cn1', id: '   ' }, res: false }
   ].forEach(({ desc, test, res }) => {
     it(`validates that return value of attribution producer has a cn value and one of cm or cs (${desc})`, async () => {
       const attributionProducer = () => test
