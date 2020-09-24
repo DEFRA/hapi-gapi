@@ -1,6 +1,6 @@
 {
   "name": "@defra/hapi-gapi",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "hapi plugin to enable server-side google analytics platform integration",
   "main": "lib/index.js",
   "directories": {
