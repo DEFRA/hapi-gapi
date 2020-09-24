@@ -32,7 +32,7 @@
     "@hapi/inert": "^5.2.2",
     "@hapi/lab": "^22.0.5",
     "@hapi/vision": "^5.5.4",
-    "husky": "^4.2.5",
+    "husky": "^4.3.0",
     "lint-staged": "^10.2.11",
     "nunjucks": "^3.2.2",
     "prettier-standard": "^16.4.1",
