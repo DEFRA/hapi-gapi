@@ -23,7 +23,7 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "@hapi/wreck": "^16.0.1",
-    "debug": "^4.1.1",
+    "debug": "^4.2.0",
     "ip-anonymize": "^0.1.0"
   },
   "devDependencies": {
