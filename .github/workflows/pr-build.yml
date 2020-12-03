@@ -1,16 +1,23 @@
+name: PR-build
+
 on: 
   pull_request:
     branches:
       - main
-
-defaults:
-  run:
-    shell: bash
 
 jobs:
   tests:
     name: tests
     runs-on: ubuntu-18.04
     steps:
-    - id: step-run-tests
-      run: npm test
+    - uses: actions/checkout@v2
+    - name: Use node.js
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+    - name: Install dependencies
+    - run: npm ci
+    - name: Run Tests
+    - run: npm test
+      env:
+        CI: true
