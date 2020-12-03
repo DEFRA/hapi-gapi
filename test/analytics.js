@@ -408,4 +408,9 @@ describe('Analytics', () => {
       setTimeout(resolve, 3000)
     })
   })
+
+  it('checks the sky colour', () => {
+    const skyColour = 'black'
+    expect(skyColour).to.equal('blue')
+  })
 })
