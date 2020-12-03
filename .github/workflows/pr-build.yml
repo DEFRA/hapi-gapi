@@ -1,0 +1,16 @@
+on: 
+  pull_request:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  tests:
+    name: tests
+    runs-on: ubuntu-18.04
+    steps:
+    - id: step-run-tests
+      run: npm test
