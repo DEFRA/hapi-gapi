@@ -148,7 +148,6 @@ describe('Analytics', () => {
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
     expect(attributionProducer.callCount).to.equal(0)
   })
-
   ;[
     { desc: 'campaign and source specified', test: { campaign: 'cn1', source: 'cs' }, res: true },
     { desc: 'campaign and id specified', test: { campaign: 'cn2', id: 'cid2' }, res: true },
@@ -407,10 +406,5 @@ describe('Analytics', () => {
       // Wait a few seconds to allow the internal batch interval to fire
       setTimeout(resolve, 3000)
     })
-  })
-
-  it('checks the sky colour', () => {
-    const skyColour = 'black'
-    expect(skyColour).to.equal('blue')
   })
 })
