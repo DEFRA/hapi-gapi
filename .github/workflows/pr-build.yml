@@ -9,6 +9,8 @@ jobs:
   tests:
     name: tests
     runs-on: ubuntu-18.04
+    env:
+      CI: true
     steps:
     - uses: actions/checkout@v2
     - name: Use node.js
@@ -19,5 +21,3 @@ jobs:
     - run: npm ci
     - name: Run Tests
     - run: npm test
-      env:
-        CI: true
