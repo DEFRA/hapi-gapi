@@ -30,6 +30,7 @@ jobs:
   npm-publication:
     name: npm-publication
     runs-on: ubuntu-18.04
+    needs: tests
     env:
       CI: true
     if: ${{ github.event_name == 'push' }}
