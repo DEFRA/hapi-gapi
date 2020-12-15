@@ -1,9 +1,14 @@
 name: PR-build
 
-on: 
+on:
   pull_request:
     branches:
       - master
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 8 1 * *'
 
 jobs:
   tests:
@@ -22,3 +27,15 @@ jobs:
         run: npm ci
       - name: Run Tests
         run: npm test
+  npm-publication:
+    name: npm-publication
+    runs-on: ubuntu-18.04
+    env:
+      CI: true
+    if: ${{ github.event_name == 'push' }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publish to npm
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
