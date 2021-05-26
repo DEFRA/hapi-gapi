@@ -214,7 +214,6 @@ describe('Analytics', () => {
       batchSize: 1
     })
     await analytics.ga(DEFAULT_REQUEST_OBJ).pageView(additionalData)
-    // console.log('wreckSpy.args', wreckSpy.args)
     expect(wreckSpy.args[0][2].payload.includes(encodedAdditionalData)).to.be.true()
   })
 
