@@ -148,7 +148,6 @@ describe('Analytics', () => {
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
     expect(attributionProducer.callCount).to.equal(0)
   })
-
   ;[
     { desc: 'campaign and source specified', test: { campaign: 'cn1', source: 'cs' }, res: true },
     { desc: 'campaign and id specified', test: { campaign: 'cn2', id: 'cid2' }, res: true },
@@ -198,6 +197,25 @@ describe('Analytics', () => {
     })
 
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
+  })
+
+  it('sends additional data for page views', async () => {
+    const additionalData = {
+      a: 1,
+      b: 'two',
+      c: false
+    }
+    const encodedAdditionalData = 'a=1&b=two&c=false'
+    const wreckSpy = sinon.spy(wreck, 'request')
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
+    await analytics.ga(DEFAULT_REQUEST_OBJ).pageView(additionalData)
+    // console.log('wreckSpy.args', wreckSpy.args)
+    expect(wreckSpy.args[0][2].payload.includes(encodedAdditionalData)).to.be.true()
   })
 
   it('handles events', () => {

@@ -1,6 +1,6 @@
 {
   "name": "@defra/hapi-gapi",
-  "version": "1.0.2",
+  "version": "1.1.2",
   "description": "hapi plugin to enable server-side google analytics platform integration",
   "main": "lib/index.js",
   "directories": {
@@ -18,25 +18,25 @@
     "google",
     "analytics"
   ],
-  "author": "Sam Gardner-Dell",
+  "author": "DEFRA",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "@hapi/wreck": "^16.0.1",
-    "debug": "^4.1.1",
+    "debug": "^4.3.1",
     "ip-anonymize": "^0.1.0"
   },
   "devDependencies": {
-    "@hapi/code": "^8.0.1",
+    "@hapi/code": "^8.0.3",
     "@hapi/hapi": "^18.4.1",
     "@hapi/inert": "^5.2.2",
     "@hapi/lab": "^22.0.5",
     "@hapi/vision": "^5.5.4",
-    "husky": "^4.2.5",
-    "lint-staged": "^10.2.11",
-    "nunjucks": "^3.2.2",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.4",
+    "nunjucks": "^3.2.3",
     "prettier-standard": "^16.4.1",
-    "sinon": "^9.0.2",
+    "sinon": "^9.2.4",
     "standard": "^14.3.4"
   },
   "prettier": {
