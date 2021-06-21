@@ -217,6 +217,38 @@ describe('Analytics', () => {
     expect(wreckSpy.args[0][2].payload.includes(encodedAdditionalData)).to.be.true()
   })
 
+  it('uses agent if https_proxy environment variable is defined', async () => {
+    sinon.stub(process, 'env').value({ https_proxy: 'some value' })
+
+    sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
+      expect(options.agent).to.exist()
+    })
+
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION,
+      batchSize: 1
+    })
+
+    analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
+  })
+
+  it('does not use agent if https_proxy environment variable is not defined', async () => {
+    sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
+      expect(options.agent).to.not.exist()
+    })
+
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION,
+      batchSize: 1
+    })
+
+    analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
+  })
+
   it('handles events', () => {
     const analytics = new Analytics({
       propertySettings: TEST_PROPERTY_SETTINGS,

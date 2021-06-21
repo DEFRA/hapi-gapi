@@ -1,6 +1,6 @@
 {
   "name": "@defra/hapi-gapi",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "hapi plugin to enable server-side google analytics platform integration",
   "main": "lib/index.js",
   "directories": {
@@ -24,6 +24,7 @@
     "@hapi/joi": "^17.1.1",
     "@hapi/wreck": "^16.0.1",
     "debug": "^4.3.1",
+    "https-proxy-agent": "^5.0.0",
     "ip-anonymize": "^0.1.0"
   },
   "devDependencies": {
