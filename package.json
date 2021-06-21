@@ -25,8 +25,7 @@
     "@hapi/wreck": "^16.0.1",
     "debug": "^4.3.1",
     "https-proxy-agent": "^5.0.0",
-    "ip-anonymize": "^0.1.0",
-    "node-fetch": "^2.6.1"
+    "ip-anonymize": "^0.1.0"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.3",
