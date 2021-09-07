@@ -234,6 +234,22 @@ describe('Analytics', () => {
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
   })
 
+  it('uses agent if HTTPS_PROXY environment variable is defined', async () => {
+    sinon.stub(process, 'env').value({ HTTPS_PROXY: 'some-other-value' })
+    sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
+      expect(options.agent.proxy.path).to.equal('some-other-value')
+    })
+
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION,
+      batchSize: 1
+    })
+
+    analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
+  })
+
   it('does not use agent if https_proxy environment variable is not defined', async () => {
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       expect(options.agent).to.not.exist()
@@ -456,5 +472,31 @@ describe('Analytics', () => {
       // Wait a few seconds to allow the internal batch interval to fire
       setTimeout(resolve, 3000)
     })
+  })
+})
+
+describe('analytics._batchInterval', () => {
+  it('sets the batch interval to 15000 if not defined in env file', () => {
+    sinon.stub(process, 'env').value({})
+
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION
+    })
+
+    expect(analytics._batchInterval).to.equal(15000)
+  })
+
+  it('sets the batch interval to 20 if not defined in env file', () => {
+    sinon.stub(process, 'env').value({})
+
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION
+    })
+
+    expect(analytics._batchSize).to.equal(20)
   })
 })
