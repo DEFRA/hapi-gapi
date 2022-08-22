@@ -6,11 +6,13 @@ const querystring = require('querystring')
 const hapiTestServer = require('./helpers/hapi-server')
 const { expect } = Code
 const { before, after, afterEach, describe, it } = (exports.lab = Lab.script())
+const debug = require('debug')('hapi-gapi')
 
 describe('Hapi Plugin', () => {
   before(async () => {
     await hapiTestServer.start({
       propertySettings: [{ id: 'UA-XXXXXX', hitTypes: ['pageview'] }],
+      trackAnalytics: request => true,
       sessionIdProducer: request => 'test-session',
       batchSize: 1,
       batchInterval: 1000
@@ -23,6 +25,22 @@ describe('Hapi Plugin', () => {
 
   afterEach(() => {
     sinon.restore()
+  })
+
+  it('track analytics is set to true so session is tracked', async () => {
+    sinon.spy(debug, 'debug')
+    expect(debug.calledWith('Session is being tracked')).to.equal(true)
+  })
+
+  it('track analytics is set to false so session is not tracked', async () => {
+    await hapiTestServer.start({
+      propertySettings: [{ id: 'UA-XXXXXX', hitTypes: ['pageview'] }],
+      trackAnalytics: request => true,
+      sessionIdProducer: request => 'test-session',
+      batchSize: 1,
+      batchInterval: 1000
+    })
+    expect(debug).toHaveBeenCalledWith('Session is not being tracked')
   })
 
   it('handles 2xx page views', { timeout: 3000 }, () => {
