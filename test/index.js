@@ -6,13 +6,11 @@ const querystring = require('querystring')
 const hapiTestServer = require('./helpers/hapi-server')
 const { expect } = Code
 const { before, after, afterEach, describe, it } = (exports.lab = Lab.script())
-const debug = require('debug')('hapi-gapi')
 
 describe('Hapi Plugin', () => {
   before(async () => {
     await hapiTestServer.start({
       propertySettings: [{ id: 'UA-XXXXXX', hitTypes: ['pageview'] }],
-      trackAnalytics: request => true,
       sessionIdProducer: request => 'test-session',
       batchSize: 1,
       batchInterval: 1000
@@ -25,22 +23,6 @@ describe('Hapi Plugin', () => {
 
   afterEach(() => {
     sinon.restore()
-  })
-
-  it('track analytics is set to true so session is tracked', async () => {
-    sinon.spy(debug, 'debug')
-    expect(debug.calledWith('Session is being tracked')).to.equal(true)
-  })
-
-  it('track analytics is set to false so session is not tracked', async () => {
-    await hapiTestServer.start({
-      propertySettings: [{ id: 'UA-XXXXXX', hitTypes: ['pageview'] }],
-      trackAnalytics: request => true,
-      sessionIdProducer: request => 'test-session',
-      batchSize: 1,
-      batchInterval: 1000
-    })
-    expect(debug).toHaveBeenCalledWith('Session is not being tracked')
   })
 
   it('handles 2xx page views', { timeout: 3000 }, () => {
@@ -191,5 +173,55 @@ describe('Hapi Plugin Registration Options', () => {
         sessionIdProducer: () => {}
       })
     ).reject('"sessionIdProducer" must have an arity of 1')
+  })
+
+  it("doesn't track if trackAnalytics option returns false", async () => {
+    sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
+      const msg = 'Unexpected request to the google measurement protocol api: should not send hits when trackAnalytics returns false'
+      Code.fail(msg)
+      throw new Error(msg)
+    })
+
+    await hapiTestServer.start({
+      propertySettings: [{ id: 'UA-XXXXXX', hitTypes: ['pageview'] }],
+      sessionIdProducer: request => 'test-session',
+      trackAnalytics: () => false,
+      batchSize: 1,
+      batchInterval: 1000
+    })
+
+    hapiTestServer.inject({ method: 'GET', url: '/view' })
+
+    // Wait to allow the internal batch interval to fire
+    await new Promise(resolve => {
+      setTimeout(resolve, 1500)
+    })
+  })
+
+  it('passes request object to trackAnalytics hander', async () => {
+    const trackAnalytics = sinon.spy()
+    sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
+      const msg = 'Unexpected request to the google measurement protocol api: should not send hits when trackAnalytics returns false'
+      Code.fail(msg)
+      throw new Error(msg)
+    })
+
+    await hapiTestServer.start({
+      propertySettings: [{ id: 'UA-XXXXXX', hitTypes: ['pageview'] }],
+      sessionIdProducer: request => 'test-session',
+      trackAnalytics,
+      batchSize: 1,
+      batchInterval: 1000
+    })
+
+    hapiTestServer.inject({ method: 'GET', url: '/view' })
+
+    // Wait to allow the internal batch interval to fire
+    await new Promise(resolve => {
+      setTimeout(resolve, 1500)
+    })
+
+    const [request] = trackAnalytics.getCall(0).args
+    expect(request === undefined).to.be.false()
   })
 })
