@@ -11,7 +11,7 @@ const querystring = require('querystring')
 const TEST_PROPERTY_SETTINGS = [
   {
     id: 'UA-XXXXXX',
-    hitTypes: ['page_view', 'event', 'ecommerce']
+    hitTypes: ['Page views', 'event', 'ecommerce']
   }
 ]
 const TEST_SESSION = () => 'test-session'
