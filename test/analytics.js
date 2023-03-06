@@ -199,23 +199,23 @@ describe('Analytics', () => {
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
   })
 
-  // it('sends additional data for page views', async () => {
-  //   const additionalData = {
-  //     a: 1,
-  //     b: 'two',
-  //     c: false
-  //   }
-  //   const encodedAdditionalData = 'a=1&b=two&c=false'
-  //   const wreckSpy = sinon.spy(wreck, 'request')
-  //   const analytics = new Analytics({
-  //     propertySettings: TEST_PROPERTY_SETTINGS,
-  //     sessionIdProducer: TEST_SESSION,
-  //     attributionProducer: TEST_DEFAULT_ATTRIBUTION,
-  //     batchSize: 1
-  //   })
-  //   await analytics.ga(DEFAULT_REQUEST_OBJ).pageView(additionalData)
-  //   expect(wreckSpy.args[0][2].payload.includes(encodedAdditionalData)).to.be.true()
-  // })
+  it('sends additional data for page views', async () => {
+    const additionalData = {
+      a: 1,
+      b: 'two',
+      c: false
+    }
+    const encodedAdditionalData = 'a=1&b=two&c=false'
+    const wreckSpy = sinon.spy(wreck, 'request')
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_DEFAULT_ATTRIBUTION,
+      batchSize: 1
+    })
+    await analytics.ga(DEFAULT_REQUEST_OBJ).pageView(additionalData)
+    expect(wreckSpy.args[0][2].payload.includes(encodedAdditionalData)).to.be.true()
+  })
 
   it('uses agent if https_proxy environment variable is defined', async () => {
     sinon.stub(process, 'env').value({ https_proxy: 'some value' })
