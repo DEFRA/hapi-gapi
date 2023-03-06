@@ -11,7 +11,7 @@ const querystring = require('querystring')
 const TEST_PROPERTY_SETTINGS = [
   {
     id: 'UA-XXXXXX',
-    hitTypes: ['Page views', 'event', 'ecommerce']
+    hitTypes: ['page_view', 'event', 'ecommerce']
   }
 ]
 const TEST_SESSION = () => 'test-session'
@@ -68,7 +68,7 @@ const TEST_DEFAULT_ATTRIBUTION = request => {
 const testDefaultHitAssertions = (method, url, options) => {
   const hit = querystring.parse(options.payload)
   expect(method).to.equal('post')
-  expect(url).to.equal('https://www.google-analytics.com/batch')
+  expect(url).to.equal('https://www.google-analytics.com/mp/collect?api_secret=sYC5IKb6RT-rdeu4D6JJ4A&measurement_id=G-DJMSHRPMW8')
   expect(hit.v).to.equal('1')
   expect(hit.tid).to.equal(TEST_PROPERTY_SETTINGS[0].id)
   expect(hit.aip).to.equal('1')
@@ -492,7 +492,7 @@ describe('analytics._batchInterval', () => {
       sessionIdProducer: TEST_SESSION,
       attributionProducer: TEST_NO_ATTRIBUTION
     })
-    expect(analytics._batchInterval).to.equal(15000)
+    expect(analytics._batchInterval).to.equal(1000)
   })
   it('sets the batch size to the HAPI_GAPI_BATCH_SIZE env variable if available', () => {
     sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_SIZE: 12 })
@@ -510,6 +510,6 @@ describe('analytics._batchInterval', () => {
       sessionIdProducer: TEST_SESSION,
       attributionProducer: TEST_NO_ATTRIBUTION
     })
-    expect(analytics._batchSize).to.equal(20)
+    expect(analytics._batchSize).to.equal(1)
   })
 })
