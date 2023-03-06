@@ -120,7 +120,7 @@ describe('Analytics', () => {
       expect(hit.cm).to.not.exist()
       expect(hit.cc).to.not.exist()
       expect(hit.ck).to.not.exist()
-      expect(hit.t).to.equal('page_location')
+      expect(hit.t).to.equal('page_view')
       expect(hit.qt).to.be.at.most(100)
     })
 
@@ -192,7 +192,7 @@ describe('Analytics', () => {
       expect(hit.cm).to.equal('attribution_medium')
       expect(hit.cc).to.equal('attribution_content')
       expect(hit.ck).to.equal('attribution_term')
-      expect(hit.t).to.equal('page_location')
+      expect(hit.t).to.equal('page_view')
       expect(hit.qt).to.be.at.most(100)
     })
 
