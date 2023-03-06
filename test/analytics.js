@@ -476,40 +476,40 @@ describe('Analytics', () => {
 })
 
 describe('analytics._batchInterval', () => {
-  // it('sets the batch interval to the HAPI_GAPI_BATCH_INTERVAL env variable if available', () => {
-  //   sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_INTERVAL: 12000 })
-  //   const analytics = new Analytics({
-  //     propertySettings: TEST_PROPERTY_SETTINGS,
-  //     sessionIdProducer: TEST_SESSION,
-  //     attributionProducer: TEST_NO_ATTRIBUTION
-  //   })
-  //   expect(analytics._batchInterval).to.equal(12000)
-  // })
-  // it('sets the batch interval to 15000 if not defined in env file', () => {
-  //   sinon.stub(process, 'env').value({})
-  //   const analytics = new Analytics({
-  //     propertySettings: TEST_PROPERTY_SETTINGS,
-  //     sessionIdProducer: TEST_SESSION,
-  //     attributionProducer: TEST_NO_ATTRIBUTION
-  //   })
-  //   expect(analytics._batchInterval).to.equal(15000)
-  // })
-  // it('sets the batch size to the HAPI_GAPI_BATCH_SIZE env variable if available', () => {
-  //   sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_SIZE: 12 })
-  //   const analytics = new Analytics({
-  //     propertySettings: TEST_PROPERTY_SETTINGS,
-  //     sessionIdProducer: TEST_SESSION,
-  //     attributionProducer: TEST_NO_ATTRIBUTION
-  //   })
-  //   expect(analytics._batchSize).to.equal(12)
-  // })
-  // it('sets the batch interval to 20 if not defined in env file', () => {
-  //   sinon.stub(process, 'env').value({})
-  //   const analytics = new Analytics({
-  //     propertySettings: TEST_PROPERTY_SETTINGS,
-  //     sessionIdProducer: TEST_SESSION,
-  //     attributionProducer: TEST_NO_ATTRIBUTION
-  //   })
-  //   expect(analytics._batchSize).to.equal(20)
-  // })
+  it('sets the batch interval to the HAPI_GAPI_BATCH_INTERVAL env variable if available', () => {
+    sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_INTERVAL: 12000 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION
+    })
+    expect(analytics._batchInterval).to.equal(12000)
+  })
+  it('sets the batch interval to 15000 if not defined in env file', () => {
+    sinon.stub(process, 'env').value({})
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION
+    })
+    expect(analytics._batchInterval).to.equal(15000)
+  })
+  it('sets the batch size to the HAPI_GAPI_BATCH_SIZE env variable if available', () => {
+    sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_SIZE: 12 })
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION
+    })
+    expect(analytics._batchSize).to.equal(12)
+  })
+  it('sets the batch interval to 20 if not defined in env file', () => {
+    sinon.stub(process, 'env').value({})
+    const analytics = new Analytics({
+      propertySettings: TEST_PROPERTY_SETTINGS,
+      sessionIdProducer: TEST_SESSION,
+      attributionProducer: TEST_NO_ATTRIBUTION
+    })
+    expect(analytics._batchSize).to.equal(20)
+  })
 })
