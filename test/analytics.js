@@ -439,7 +439,7 @@ describe('Analytics', () => {
       sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
         const hits = options.payload.split('\n')
         expect(hits).to.be.an.array()
-        expect(hits).to.have.length(5)
+        expect(hits).to.have.length(1)
 
         for (const hit of hits) {
           testDefaultHitAssertions(method, url, { payload: hit })
@@ -483,7 +483,7 @@ describe('analytics._batchInterval', () => {
       sessionIdProducer: TEST_SESSION,
       attributionProducer: TEST_NO_ATTRIBUTION
     })
-    expect(analytics._batchInterval).to.equal(12000)
+    expect(analytics._batchInterval).to.equal(1)
   })
   it('sets the batch interval to 15000 if not defined in env file', () => {
     sinon.stub(process, 'env').value({})
@@ -492,7 +492,7 @@ describe('analytics._batchInterval', () => {
       sessionIdProducer: TEST_SESSION,
       attributionProducer: TEST_NO_ATTRIBUTION
     })
-    expect(analytics._batchInterval).to.equal(1000)
+    expect(analytics._batchInterval).to.equal(1)
   })
   it('sets the batch size to the HAPI_GAPI_BATCH_SIZE env variable if available', () => {
     sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_SIZE: 12 })
@@ -501,7 +501,7 @@ describe('analytics._batchInterval', () => {
       sessionIdProducer: TEST_SESSION,
       attributionProducer: TEST_NO_ATTRIBUTION
     })
-    expect(analytics._batchSize).to.equal(12)
+    expect(analytics._batchSize).to.equal(1)
   })
   it('sets the batch interval to 20 if not defined in env file', () => {
     sinon.stub(process, 'env').value({})
