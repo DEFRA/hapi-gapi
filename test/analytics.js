@@ -68,7 +68,7 @@ const TEST_DEFAULT_ATTRIBUTION = request => {
 const testDefaultHitAssertions = (method, url, options) => {
   const hit = querystring.parse(options.payload)
   expect(method).to.equal('post')
-  expect(url).to.equal('https://www.google-analytics.com/mp/collect?api_secret=sYC5IKb6RT-rdeu4D6JJ4A&measurement_id=G-DJMSHRPMW8')
+  expect(url).to.equal('https://www.google-analytics.com/batch/analytics/v3')
   expect(hit.v).to.equal('1')
   expect(hit.tid).to.equal('G-DJMSHRPMW8')
   expect(hit.aip).to.equal(undefined)
