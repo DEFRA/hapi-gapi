@@ -11,7 +11,7 @@ const querystring = require('querystring')
 const TEST_PROPERTY_SETTINGS = [
   {
     id: 'UA-XXXXXX',
-    hitTypes: ['page_view', 'event', 'ecommerce']
+    hitTypes: ['pageview', 'event', 'ecommerce']
   }
 ]
 const TEST_SESSION = () => 'test-session'
@@ -69,35 +69,35 @@ const testDefaultHitAssertions = (method, url, options) => {
   const hit = querystring.parse(options.payload)
   expect(method).to.equal('post')
   expect(url).to.equal('https://www.google-analytics.com/mp/collect?api_secret=sYC5IKb6RT-rdeu4D6JJ4A&measurement_id=G-DJMSHRPMW8')
-  expect(hit.v).to.equal()
-  expect(hit.tid).to.equal(undefined)
-  expect(hit.aip).to.equal()
-  expect(hit.ds).to.equal(undefined)
-  expect(hit.dh).to.equal(undefined)
-  expect(hit.dr).to.equal(undefined)
-  expect(hit.ua).to.equal(undefined)
-  expect(hit.dp).to.equal(undefined)
+  expect(hit.v).to.equal('1')
+  expect(hit.tid).to.equal(TEST_PROPERTY_SETTINGS[0].id)
+  expect(hit.aip).to.equal('1')
+  expect(hit.ds).to.equal('web')
+  expect(hit.dh).to.equal('example.com')
+  expect(hit.dr).to.equal('anothersite.com')
+  expect(hit.ua).to.equal('Mozilla')
+  expect(hit.dp).to.equal('/some/endpoint')
   return hit
 }
 
 const testDefaultEcommerceProductAssertions = (hit, eventAction) => {
-  expect(hit.ec).to.equal(undefined)
-  expect(hit.ea).to.equal(undefined)
-  expect(hit.ev).to.equal(undefined)
-  expect(hit.pr1id).to.equal(undefined)
-  expect(hit.pr1nm).to.equal(undefined)
-  expect(hit.pr1br).to.equal(undefined)
-  expect(hit.pr1ca).to.equal(undefined)
-  expect(hit.pr1va).to.equal(undefined)
-  expect(hit.pr1qt).to.equal(undefined)
-  expect(hit.pr1pr).to.equal(undefined)
-  expect(hit.pr2id).to.equal(undefined)
-  expect(hit.pr2nm).to.equal(undefined)
-  expect(hit.pr2br).to.equal(undefined)
-  expect(hit.pr2ca).to.equal(undefined)
-  expect(hit.pr2va).to.equal(undefined)
-  expect(hit.pr2qt).to.equal(undefined)
-  expect(hit.pr2pr).to.equal(undefined)
+  expect(hit.ec).to.equal('ecommerce')
+  expect(hit.ea).to.equal(eventAction)
+  expect(hit.ev).to.equal(String(Math.floor(ECOMMERCE_TEST_PRODUCTS[0].price + ECOMMERCE_TEST_PRODUCTS[1].price)))
+  expect(hit.pr1id).to.equal(ECOMMERCE_TEST_PRODUCTS[0].id)
+  expect(hit.pr1nm).to.equal(ECOMMERCE_TEST_PRODUCTS[0].name)
+  expect(hit.pr1br).to.equal(ECOMMERCE_TEST_PRODUCTS[0].brand)
+  expect(hit.pr1ca).to.equal(ECOMMERCE_TEST_PRODUCTS[0].category)
+  expect(hit.pr1va).to.equal(ECOMMERCE_TEST_PRODUCTS[0].variant)
+  expect(hit.pr1qt).to.equal(String(ECOMMERCE_TEST_PRODUCTS[0].quantity))
+  expect(hit.pr1pr).to.equal(ECOMMERCE_TEST_PRODUCTS[0].price.toFixed(2))
+  expect(hit.pr2id).to.equal(ECOMMERCE_TEST_PRODUCTS[1].id)
+  expect(hit.pr2nm).to.equal(ECOMMERCE_TEST_PRODUCTS[1].name)
+  expect(hit.pr2br).to.equal(ECOMMERCE_TEST_PRODUCTS[1].brand)
+  expect(hit.pr2ca).to.equal(ECOMMERCE_TEST_PRODUCTS[1].category)
+  expect(hit.pr2va).to.equal(ECOMMERCE_TEST_PRODUCTS[1].variant)
+  expect(hit.pr2qt).to.equal(String(ECOMMERCE_TEST_PRODUCTS[1].quantity))
+  expect(hit.pr2pr).to.equal(ECOMMERCE_TEST_PRODUCTS[1].price.toFixed(2))
   return hit
 }
 
@@ -120,7 +120,8 @@ describe('Analytics', () => {
       expect(hit.cm).to.not.exist()
       expect(hit.cc).to.not.exist()
       expect(hit.ck).to.not.exist()
-      expect(hit.t).to.equal(undefined)
+      expect(hit.t).to.equal('pageview')
+      expect(hit.qt).to.be.at.most(100)
     })
 
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
@@ -186,12 +187,13 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.cn).to.equal(undefined)
-      expect(hit.cs).to.equal(undefined)
-      expect(hit.cm).to.equal(undefined)
-      expect(hit.cc).to.equal(undefined)
-      expect(hit.ck).to.equal(undefined)
-      expect(hit.t).to.equal(undefined)
+      expect(hit.cn).to.equal('attribution_campaign')
+      expect(hit.cs).to.equal('attribution_source')
+      expect(hit.cm).to.equal('attribution_medium')
+      expect(hit.cc).to.equal('attribution_content')
+      expect(hit.ck).to.equal('attribution_term')
+      expect(hit.t).to.equal('pageview')
+      expect(hit.qt).to.be.at.most(100)
     })
 
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
@@ -280,11 +282,12 @@ describe('Analytics', () => {
 
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.ec).to.equal(undefined)
-      expect(hit.ea).to.equal(undefined)
-      expect(hit.el).to.equal(undefined)
-      expect(hit.ev).to.equal(undefined)
-      expect(hit.t).to.equal(undefined)
+      expect(hit.ec).to.equal(testEvent.category)
+      expect(hit.ea).to.equal(testEvent.action)
+      expect(hit.el).to.equal(testEvent.label)
+      expect(hit.ev).to.equal(String(testEvent.value))
+      expect(hit.t).to.equal('event')
+      expect(hit.qt).to.be.at.most(100)
     })
 
     analytics.ga(DEFAULT_REQUEST_OBJ).event(testEvent)
@@ -320,7 +323,7 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal(undefined)
+      expect(hit.pa).to.equal('detail')
       testDefaultEcommerceProductAssertions(hit, 'productView')
     })
     analytics
@@ -338,7 +341,7 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal(undefined)
+      expect(hit.pa).to.equal('add')
       testDefaultEcommerceProductAssertions(hit, 'addToCart')
     })
     analytics
@@ -356,7 +359,7 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal(undefined)
+      expect(hit.pa).to.equal('remove')
       testDefaultEcommerceProductAssertions(hit, 'removeFromCart')
     })
     analytics
@@ -374,9 +377,9 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal(undefined)
-      expect(hit.cos).to.equal(undefined)
-      expect(hit.col).to.equal(undefined)
+      expect(hit.pa).to.equal('checkout')
+      expect(hit.cos).to.equal('1')
+      expect(hit.col).to.equal('visa')
       testDefaultEcommerceProductAssertions(hit, 'checkout')
     })
     analytics
@@ -394,9 +397,9 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal(undefined)
-      expect(hit.ti).to.equal(undefined)
-      expect(hit.ta).to.equal(undefined)
+      expect(hit.pa).to.equal('purchase')
+      expect(hit.ti).to.equal('transactionId')
+      expect(hit.ta).to.equal('affiliate_code')
       testDefaultEcommerceProductAssertions(hit, 'purchase')
     })
     analytics
@@ -414,8 +417,8 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal(undefined)
-      expect(hit.ti).to.equal(undefined)
+      expect(hit.pa).to.equal('refund')
+      expect(hit.ti).to.equal('transactionId')
       testDefaultEcommerceProductAssertions(hit, 'refund')
     })
     analytics
@@ -436,7 +439,7 @@ describe('Analytics', () => {
   //     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
   //       const hits = options.payload.split('\n')
   //       expect(hits).to.be.an.array()
-  //       expect(hits).to.have.length(1)
+  //       expect(hits).to.have.length(5)
 
   //       for (const hit of hits) {
   //         testDefaultHitAssertions(method, url, { payload: hit })
@@ -475,38 +478,49 @@ describe('Analytics', () => {
 describe('analytics._batchInterval', () => {
   it('sets the batch interval to the HAPI_GAPI_BATCH_INTERVAL env variable if available', () => {
     sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_INTERVAL: 12000 })
+
     const analytics = new Analytics({
       propertySettings: TEST_PROPERTY_SETTINGS,
       sessionIdProducer: TEST_SESSION,
       attributionProducer: TEST_NO_ATTRIBUTION
     })
+
     expect(analytics._batchInterval).to.equal(1)
   })
+
   it('sets the batch interval to 15000 if not defined in env file', () => {
     sinon.stub(process, 'env').value({})
+
     const analytics = new Analytics({
       propertySettings: TEST_PROPERTY_SETTINGS,
       sessionIdProducer: TEST_SESSION,
       attributionProducer: TEST_NO_ATTRIBUTION
     })
+
     expect(analytics._batchInterval).to.equal(1)
   })
+
   it('sets the batch size to the HAPI_GAPI_BATCH_SIZE env variable if available', () => {
     sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_SIZE: 12 })
+
     const analytics = new Analytics({
       propertySettings: TEST_PROPERTY_SETTINGS,
       sessionIdProducer: TEST_SESSION,
       attributionProducer: TEST_NO_ATTRIBUTION
     })
+
     expect(analytics._batchSize).to.equal(1)
   })
+
   it('sets the batch interval to 20 if not defined in env file', () => {
     sinon.stub(process, 'env').value({})
+
     const analytics = new Analytics({
       propertySettings: TEST_PROPERTY_SETTINGS,
       sessionIdProducer: TEST_SESSION,
       attributionProducer: TEST_NO_ATTRIBUTION
     })
+
     expect(analytics._batchSize).to.equal(1)
   })
 })
