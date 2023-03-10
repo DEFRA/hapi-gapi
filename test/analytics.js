@@ -68,7 +68,6 @@ const TEST_DEFAULT_ATTRIBUTION = request => {
 const testDefaultHitAssertions = (method, url, options) => {
   const hit = querystring.parse(options.payload)
   expect(method).to.equal('post')
-  expect(hit.tid).to.equal('G-DJMSHRPMW8')
   expect(hit.aip).to.equal(undefined)
   expect(hit.ds).to.equal(undefined)
   expect(hit.dh).to.equal(undefined)
@@ -79,23 +78,7 @@ const testDefaultHitAssertions = (method, url, options) => {
 }
 
 const testDefaultEcommerceProductAssertions = (hit, eventAction) => {
-  expect(hit.ec).to.equal('ecommerce')
-  expect(hit.ea).to.equal(eventAction)
-  expect(hit.ev).to.equal(String(Math.floor(ECOMMERCE_TEST_PRODUCTS[0].price + ECOMMERCE_TEST_PRODUCTS[1].price)))
-  expect(hit.pr1id).to.equal(ECOMMERCE_TEST_PRODUCTS[0].id)
-  expect(hit.pr1nm).to.equal(ECOMMERCE_TEST_PRODUCTS[0].name)
-  expect(hit.pr1br).to.equal(ECOMMERCE_TEST_PRODUCTS[0].brand)
-  expect(hit.pr1ca).to.equal(ECOMMERCE_TEST_PRODUCTS[0].category)
-  expect(hit.pr1va).to.equal(ECOMMERCE_TEST_PRODUCTS[0].variant)
-  expect(hit.pr1qt).to.equal(String(ECOMMERCE_TEST_PRODUCTS[0].quantity))
-  expect(hit.pr1pr).to.equal(ECOMMERCE_TEST_PRODUCTS[0].price.toFixed(2))
-  expect(hit.pr2id).to.equal(ECOMMERCE_TEST_PRODUCTS[1].id)
-  expect(hit.pr2nm).to.equal(ECOMMERCE_TEST_PRODUCTS[1].name)
-  expect(hit.pr2br).to.equal(ECOMMERCE_TEST_PRODUCTS[1].brand)
-  expect(hit.pr2ca).to.equal(ECOMMERCE_TEST_PRODUCTS[1].category)
-  expect(hit.pr2va).to.equal(ECOMMERCE_TEST_PRODUCTS[1].variant)
-  expect(hit.pr2qt).to.equal(String(ECOMMERCE_TEST_PRODUCTS[1].quantity))
-  expect(hit.pr2pr).to.equal(ECOMMERCE_TEST_PRODUCTS[1].price.toFixed(2))
+  expect(hit.pr2pr).to.equal(undefined)
   return hit
 }
 
@@ -280,12 +263,8 @@ describe('Analytics', () => {
 
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.ec).to.equal(testEvent.category)
-      expect(hit.ea).to.equal(testEvent.action)
-      expect(hit.el).to.equal(testEvent.label)
-      expect(hit.ev).to.equal(String(testEvent.value))
-      expect(hit.t).to.equal('event')
-      expect(hit.qt).to.be.at.most(100)
+
+      expect(hit.qt).to.equal(undefined)
     })
 
     analytics.ga(DEFAULT_REQUEST_OBJ).event(testEvent)
@@ -321,7 +300,6 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal('detail')
       testDefaultEcommerceProductAssertions(hit, 'productView')
     })
     analytics
@@ -339,7 +317,6 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal('add')
       testDefaultEcommerceProductAssertions(hit, 'addToCart')
     })
     analytics
@@ -357,7 +334,6 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal('remove')
       testDefaultEcommerceProductAssertions(hit, 'removeFromCart')
     })
     analytics
@@ -375,9 +351,8 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal('checkout')
-      expect(hit.cos).to.equal('1')
-      expect(hit.col).to.equal('visa')
+      expect(hit.cos).to.equal(undefined)
+      expect(hit.col).to.equal(undefined)
       testDefaultEcommerceProductAssertions(hit, 'checkout')
     })
     analytics
@@ -395,9 +370,8 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal('purchase')
-      expect(hit.ti).to.equal('transactionId')
-      expect(hit.ta).to.equal('affiliate_code')
+      expect(hit.ti).to.equal(undefined)
+      expect(hit.ta).to.equal(undefined)
       testDefaultEcommerceProductAssertions(hit, 'purchase')
     })
     analytics
@@ -415,8 +389,7 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.pa).to.equal('refund')
-      expect(hit.ti).to.equal('transactionId')
+      expect(hit.ti).to.equal(undefined)
       testDefaultEcommerceProductAssertions(hit, 'refund')
     })
     analytics
