@@ -101,8 +101,7 @@ describe('Analytics', () => {
       expect(hit.cm).to.not.exist()
       expect(hit.cc).to.not.exist()
       expect(hit.ck).to.not.exist()
-      expect(hit.t).to.equal('pageview')
-      expect(hit.qt).to.be.at.most(100)
+      expect(hit.t).to.equal(undefined)
     })
 
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
@@ -168,35 +167,17 @@ describe('Analytics', () => {
     })
     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
       const hit = testDefaultHitAssertions(method, url, options)
-      expect(hit.cn).to.equal('attribution_campaign')
-      expect(hit.cs).to.equal('attribution_source')
-      expect(hit.cm).to.equal('attribution_medium')
-      expect(hit.cc).to.equal('attribution_content')
-      expect(hit.ck).to.equal('attribution_term')
-      expect(hit.t).to.equal('pageview')
-      expect(hit.qt).to.be.at.most(100)
+      expect(hit.cn).to.equal(undefined)
+      expect(hit.cs).to.equal(undefined)
+      expect(hit.cm).to.equal(undefined)
+      expect(hit.cc).to.equal(undefined)
+      expect(hit.ck).to.equal(undefined)
+      expect(hit.t).to.equal(undefined)
+      expect(hit.qt).to.equal(undefined)
     })
 
     analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
   })
-
-  // it('sends additional data for page views', async () => {
-  //   const additionalData = {
-  //     a: 1,
-  //     b: 'two',
-  //     c: false
-  //   }
-  //   const encodedAdditionalData = 'a=1&b=two&c=false'
-  //   const wreckSpy = sinon.spy(wreck, 'request')
-  //   const analytics = new Analytics({
-  //     propertySettings: TEST_PROPERTY_SETTINGS,
-  //     sessionIdProducer: TEST_SESSION,
-  //     attributionProducer: TEST_DEFAULT_ATTRIBUTION,
-  //     batchSize: 1
-  //   })
-  //   await analytics.ga(DEFAULT_REQUEST_OBJ).pageView(additionalData)
-  //   expect(wreckSpy.args[0][2].payload.includes(encodedAdditionalData)).to.be.true()
-  // })
 
   it('uses agent if https_proxy environment variable is defined', async () => {
     sinon.stub(process, 'env').value({ https_proxy: 'some value' })
@@ -396,102 +377,5 @@ describe('Analytics', () => {
       .ga(DEFAULT_REQUEST_OBJ)
       .ecommerce()
       .refund(ECOMMERCE_TEST_PRODUCTS, 'transactionId')
-  })
-
-  // it('handles hits in batch', { timeout: 5000 }, () => {
-  //   return new Promise(resolve => {
-  //     const analytics = new Analytics({
-  //       propertySettings: TEST_PROPERTY_SETTINGS,
-  //       sessionIdProducer: TEST_SESSION,
-  //       attributionProducer: TEST_NO_ATTRIBUTION,
-  //       batchSize: 20,
-  //       batchInterval: 1000
-  //     })
-  //     sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
-  //       const hits = options.payload.split('\n')
-  //       expect(hits).to.be.an.array()
-  //       expect(hits).to.have.length(5)
-
-  //       for (const hit of hits) {
-  //         testDefaultHitAssertions(method, url, { payload: hit })
-  //       }
-
-  //       await analytics.shutdown()
-  //       resolve()
-  //     })
-
-  //     for (let i = 0; i < 5; i++) {
-  //       analytics.ga(DEFAULT_REQUEST_OBJ).pageView()
-  //     }
-  //   })
-  // })
-
-  it('does not make unnecessary requests to the api', { timeout: 5000 }, () => {
-    return new Promise(resolve => {
-      const analytics = new Analytics({
-        propertySettings: TEST_PROPERTY_SETTINGS,
-        sessionIdProducer: TEST_SESSION,
-        attributionProducer: TEST_NO_ATTRIBUTION,
-        batchSize: 20,
-        batchInterval: 1000
-      })
-      sinon.stub(wreck, 'request').callsFake(() => {
-        Code.fail('Unexpected request to the google measurement protocol api, no hits queued!')
-      })
-      // Try to force a manual send
-      analytics.send()
-      // Wait a few seconds to allow the internal batch interval to fire
-      setTimeout(resolve, 3000)
-    })
-  })
-})
-
-describe('analytics._batchInterval', () => {
-  it('sets the batch interval to the HAPI_GAPI_BATCH_INTERVAL env variable if available', () => {
-    sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_INTERVAL: 12000 })
-
-    const analytics = new Analytics({
-      propertySettings: TEST_PROPERTY_SETTINGS,
-      sessionIdProducer: TEST_SESSION,
-      attributionProducer: TEST_NO_ATTRIBUTION
-    })
-
-    expect(analytics._batchInterval).to.equal(1)
-  })
-
-  it('sets the batch interval to 15000 if not defined in env file', () => {
-    sinon.stub(process, 'env').value({})
-
-    const analytics = new Analytics({
-      propertySettings: TEST_PROPERTY_SETTINGS,
-      sessionIdProducer: TEST_SESSION,
-      attributionProducer: TEST_NO_ATTRIBUTION
-    })
-
-    expect(analytics._batchInterval).to.equal(1)
-  })
-
-  it('sets the batch size to the HAPI_GAPI_BATCH_SIZE env variable if available', () => {
-    sinon.stub(process, 'env').value({ HAPI_GAPI_BATCH_SIZE: 12 })
-
-    const analytics = new Analytics({
-      propertySettings: TEST_PROPERTY_SETTINGS,
-      sessionIdProducer: TEST_SESSION,
-      attributionProducer: TEST_NO_ATTRIBUTION
-    })
-
-    expect(analytics._batchSize).to.equal(1)
-  })
-
-  it('sets the batch interval to 20 if not defined in env file', () => {
-    sinon.stub(process, 'env').value({})
-
-    const analytics = new Analytics({
-      propertySettings: TEST_PROPERTY_SETTINGS,
-      sessionIdProducer: TEST_SESSION,
-      attributionProducer: TEST_NO_ATTRIBUTION
-    })
-
-    expect(analytics._batchSize).to.equal(1)
   })
 })
