@@ -1,18 +1,134 @@
-const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 const sinon = require('sinon')
-const { expect } = Code
-const { afterEach, describe, it } = (exports.lab = Lab.script())
 const wreck = require('@hapi/wreck')
+const debug = require('debug')('hapi-gapi')
+// const assert = require('assert')
+const { expect } = require('@hapi/code')
+const { afterEach, beforeEach, describe, it } = exports.lab = Lab.script()
+console.log('debug', debug)
 
 const Analytics = require('../lib/analytics')
-const querystring = require('querystring')
-
 describe('Analytics', () => {
-  it.only('creates a new analytics object', async () => {
-    const anayticsObject = new Analytics({
-      propertySettings: 'bleh'
-    })
-    expect(anayticsObject).to.be.instanceof(Analytics)
+  beforeEach(() => {
+    process.env.ANALYTICS_XGOV_PROPERTY = 'testProperty'
+    process.env.ANALYTICS_PROPERTY_API = 'testSecret'
   })
+  afterEach(() => {
+    delete process.env.ANALYTICS_XGOV_PROPERTY
+    delete process.env.ANALYTICS_PROPERTY_API
+  })
+
+  describe('HTTPS_PROXY environment variable', () => {
+    it('should use HTTPS_PROXY if it is set', () => {
+      process.env.HTTPS_PROXY = 'https://myproxy:8080'
+      const analytics = new Analytics(getSettings({}))
+      expect(analytics._agent.proxy.href).to.equal('https://myproxy:8080/')
+    })
+
+    it('should use https_proxy if HTTPS_PROXY is not set', () => {
+      process.env.https_proxy = 'https://myproxy:1234'
+      const analytics = new Analytics(getSettings({}))
+      expect(analytics._agent.proxy.href).to.equal('https://myproxy:1234/')
+    })
+  })
+
+  describe('analytics object agent property', () => {
+    it('should use HTTPS_PROXY if it is set', () => {
+      process.env.HTTPS_PROXY = 'https://myproxy:8080'
+      const analytics = new Analytics(getSettings({}))
+      expect(analytics._agent.proxy.href).to.equal('https://myproxy:8080/')
+    })
+
+    it('should use https_proxy if HTTPS_PROXY is not set', () => {
+      process.env.https_proxy = 'https://myproxy:1234'
+      const analytics = new Analytics(getSettings({}))
+      expect(analytics._agent.proxy.href).to.equal('https://myproxy:1234/')
+    })
+
+    it('should use be undefined is neither HTTPS_PROXY or https_proxy set', () => {
+      const analytics = new Analytics(getSettings({}))
+      expect(analytics._agent).to.equal(undefined)
+    })
+  })
+
+  describe('ga', () => {
+    it('should return an object with a pageView method', () => {
+      const analytics = new Analytics(getSettings({}))
+      const result = analytics.ga({})
+      expect(result).to.be.an.object()
+      expect(result.pageView).to.be.a.function()
+    })
+  })
+
+  describe('hit', () => {
+    it('should call send with the correct parameters', async () => {
+      const payload = { t: 'page_view', page_view: 'True', page_title: 'page_path' }
+      const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', hitTypes: ['pageview'] }, '123'))
+      const sendStub = sinon.stub(analytics, 'send')
+      await analytics.hit('page_view', getRequest(), payload)
+      expect(sendStub.calledWith(process.env.ANALYTICS_XGOV_PROPERTY, process.env.ANALYTICS_PROPERTY_API, 'page_path', sinon.match.string)).to.be.true()
+      sendStub.restore()
+    })
+
+    it('should stop the process return debug message if the property length is 0', async () => {
+      const analytics = new Analytics(getSettings())
+      const result = await analytics.hit('page_view', getRequest(), {})
+      console.log('result ', result)
+      expect(result).to.equal(undefined)
+    })
+  })
+
+  describe('send', () => {
+    it('should make a post request to the Google Analytics API', async () => {
+      const ANALYTICS_XGOV_PROPERTY = 'measurement_id'
+      const ANALYTICS_PROPERTY_API = 'api_secret'
+      const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', hitTypes: ['pageview'] }, '123'))
+      const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+      await analytics.send('measurement_id', 'api_secret', 'page_path', 'session_id')
+      expect(wreckRequestStub.calledOnce).to.be.true()
+      expect(wreckRequestStub.getCall(0).args[0]).to.equal('post')
+      expect(wreckRequestStub.getCall(0).args[1]).to.equal(`https://www.google-analytics.com/mp/collect?api_secret=${ANALYTICS_PROPERTY_API}&measurement_id=${ANALYTICS_XGOV_PROPERTY}`)
+      // expect(wreckRequestStub.getCall(0).args[2].payload.client_id).to.match(sinon.match.string)
+      expect(wreckRequestStub.getCall(0).args[2].payload).to.include({
+        user_id: 'session_id',
+        events: [
+          {
+            name: 'page_view',
+            params: {
+              page_view: 'True',
+              page_title: 'page_path'
+            }
+          }
+        ]
+      })
+      expect(wreckRequestStub.getCall(0).args[2].timeout).to.equal(0)
+      wreckRequestStub.restore()
+    })
+
+    // it.only('should log a message after completing the request', async () => {
+    //   process.env.DEBUG = 'hapi-gapi:*'
+    //   const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', hitTypes: ['pageview'] }, '123'))
+    //   const wreckRequestStub = sinon.stub(wreck, 'request')
+    //   console.log('debug ', debug)
+    //   const debugSpy = sinon.spy(debug)
+    //   console.log('debugSpy ', debugSpy)
+    //   wreckRequestStub.resolves()
+    //   await analytics.send('test-measurement-id', 'test-api-secret', 'test-page-path', 'test-session-id')
+
+    //   sinon.assert.calledWith(debugSpy, [])
+    // })
+  })
+})
+
+const getSettings = ({
+  propertySettings = [],
+  id = '123'
+}) => ({
+  propertySettings: [propertySettings],
+  sessionIdProducer: async (request) => { return id }
+})
+const getRequest = () => ({
+  route: {
+    fingerprint: 'page_path'
+  }
 })
