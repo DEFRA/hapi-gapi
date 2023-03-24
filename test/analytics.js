@@ -105,18 +105,18 @@ describe('Analytics', () => {
       wreckRequestStub.restore()
     })
 
-    // it.only('should log a message after completing the request', async () => {
-    //   process.env.DEBUG = 'hapi-gapi:*'
-    //   const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', hitTypes: ['pageview'] }, '123'))
-    //   const wreckRequestStub = sinon.stub(wreck, 'request')
-    //   console.log('debug ', debug)
-    //   const debugSpy = sinon.spy(debug)
-    //   console.log('debugSpy ', debugSpy)
-    //   wreckRequestStub.resolves()
-    //   await analytics.send('test-measurement-id', 'test-api-secret', 'test-page-path', 'test-session-id')
+    it.only('should log a message after completing the request', async () => {
+      process.env.DEBUG = 'hapi-gapi:*'
+      const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', hitTypes: ['pageview'] }, '123'))
+      const wreckRequestStub = sinon.stub(wreck, 'request')
+      console.log('debug ', debug)
+      const debugSpy = sinon.spy(debug)
+      console.log('debugSpy ', debugSpy)
+      wreckRequestStub.resolves()
+      await analytics.send('test-measurement-id', 'test-api-secret', 'test-page-path', 'test-session-id')
 
-    //   sinon.assert.calledWith(debugSpy, [])
-    // })
+      sinon.assert.calledWith(debugSpy, [])
+    })
   })
 })
 
