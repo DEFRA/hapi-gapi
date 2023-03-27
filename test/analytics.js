@@ -1,14 +1,20 @@
 const Lab = require('@hapi/lab')
 const sinon = require('sinon')
+// Below sinon require code and function is necessary
+// to have the stub of debug work.
+const debugStub = sinon.stub()
+require('debug')
+delete require.cache[require.resolve('debug')]
+require.cache[require.resolve('debug')] = {
+  exports: () => debugStub
+}
+require('debug')
 const wreck = require('@hapi/wreck')
-const debug = require('debug')('hapi-gapi')
-// const assert = require('assert')
 const { expect } = require('@hapi/code')
 const { afterEach, beforeEach, describe, it } = exports.lab = Lab.script()
-console.log('debug', debug)
 
 const Analytics = require('../lib/analytics')
-describe('Analytics', () => {
+describe.only('Analytics', () => {
   beforeEach(() => {
     process.env.ANALYTICS_XGOV_PROPERTY = 'testProperty'
     process.env.ANALYTICS_PROPERTY_API = 'testSecret'
@@ -16,6 +22,8 @@ describe('Analytics', () => {
   afterEach(() => {
     delete process.env.ANALYTICS_XGOV_PROPERTY
     delete process.env.ANALYTICS_PROPERTY_API
+    delete process.env.HTTPS_PROXY
+    delete process.env.https_proxy
   })
 
   describe('HTTPS_PROXY environment variable', () => {
@@ -58,12 +66,19 @@ describe('Analytics', () => {
       expect(result).to.be.an.object()
       expect(result.pageView).to.be.a.function()
     })
+
+    it('should call hit method with correct arguments', () => {
+      const analytics = new Analytics(getSettings({}))
+      const hitSpy = sinon.spy(analytics, 'hit')
+      analytics.ga(getRequest()).pageView({ userId: '123' })
+      expect(hitSpy.calledWith('page_view', 'example_request', { t: 'page_view', userId: '123' }))
+    })
   })
 
   describe('hit', () => {
     it('should call send with the correct parameters', async () => {
       const payload = { t: 'page_view', page_view: 'True', page_title: 'page_path' }
-      const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', hitTypes: ['pageview'] }, '123'))
+      const analytics = new Analytics(getSettings({ propertySettings: { id: 'G-XXXXXXX', hitTypes: ['pageview'] } }, { sessionIdProducer: '123' }))
       const sendStub = sinon.stub(analytics, 'send')
       await analytics.hit('page_view', getRequest(), payload)
       expect(sendStub.calledWith(process.env.ANALYTICS_XGOV_PROPERTY, process.env.ANALYTICS_PROPERTY_API, 'page_path', sinon.match.string)).to.be.true()
@@ -71,10 +86,10 @@ describe('Analytics', () => {
     })
 
     it('should stop the process return debug message if the property length is 0', async () => {
-      const analytics = new Analytics(getSettings())
-      const result = await analytics.hit('page_view', getRequest(), {})
-      console.log('result ', result)
-      expect(result).to.equal(undefined)
+      process.env.DEBUG = 'hapi-gapi:*'
+      const analytics = new Analytics(getSettings({ propertySettings: [] }))
+      await analytics.hit('page_view', getRequest(), {})
+      sinon.assert.calledWith(debugStub, 'No property settings')
     })
   })
 
@@ -82,7 +97,7 @@ describe('Analytics', () => {
     it('should make a post request to the Google Analytics API', async () => {
       const ANALYTICS_XGOV_PROPERTY = 'measurement_id'
       const ANALYTICS_PROPERTY_API = 'api_secret'
-      const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', hitTypes: ['pageview'] }, '123'))
+      const analytics = new Analytics(getSettings({ propertySettings: { id: 'G-XXXXXXX', hitTypes: ['pageview'] } }, { sessionIdProducer: '123' }))
       const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
       await analytics.send('measurement_id', 'api_secret', 'page_path', 'session_id')
       expect(wreckRequestStub.calledOnce).to.be.true()
@@ -101,21 +116,18 @@ describe('Analytics', () => {
           }
         ]
       })
-      expect(wreckRequestStub.getCall(0).args[2].timeout).to.equal(0)
+      expect(wreckRequestStub.getCall(0).args[2].timeout).to.equal(1000)
       wreckRequestStub.restore()
     })
 
-    it.only('should log a message after completing the request', async () => {
+    it('should log a message after completing the request', async () => {
       process.env.DEBUG = 'hapi-gapi:*'
       const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', hitTypes: ['pageview'] }, '123'))
       const wreckRequestStub = sinon.stub(wreck, 'request')
-      console.log('debug ', debug)
-      const debugSpy = sinon.spy(debug)
-      console.log('debugSpy ', debugSpy)
       wreckRequestStub.resolves()
       await analytics.send('test-measurement-id', 'test-api-secret', 'test-page-path', 'test-session-id')
 
-      sinon.assert.calledWith(debugSpy, [])
+      sinon.assert.calledWith(debugStub, 'Completed request to google analytics measurement protocol API')
     })
   })
 })
@@ -124,7 +136,7 @@ const getSettings = ({
   propertySettings = [],
   id = '123'
 }) => ({
-  propertySettings: [propertySettings],
+  propertySettings,
   sessionIdProducer: async (request) => { return id }
 })
 const getRequest = () => ({
