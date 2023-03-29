@@ -14,7 +14,7 @@ const { expect } = require('@hapi/code')
 const { afterEach, beforeEach, describe, it } = exports.lab = Lab.script()
 
 const Analytics = require('../lib/analytics')
-describe.only('Analytics', () => {
+describe('Analytics', () => {
   beforeEach(() => {
     process.env.ANALYTICS_XGOV_PROPERTY = 'testProperty'
     process.env.ANALYTICS_PROPERTY_API = 'testSecret'
@@ -103,7 +103,6 @@ describe.only('Analytics', () => {
       expect(wreckRequestStub.calledOnce).to.be.true()
       expect(wreckRequestStub.getCall(0).args[0]).to.equal('post')
       expect(wreckRequestStub.getCall(0).args[1]).to.equal(`https://www.google-analytics.com/mp/collect?api_secret=${ANALYTICS_PROPERTY_API}&measurement_id=${ANALYTICS_XGOV_PROPERTY}`)
-      // expect(wreckRequestStub.getCall(0).args[2].payload.client_id).to.match(sinon.match.string)
       expect(wreckRequestStub.getCall(0).args[2].payload).to.include({
         user_id: 'session_id',
         events: [
