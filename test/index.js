@@ -1,16 +1,9 @@
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 const sinon = require('sinon')
-const debugStub = sinon.stub()
-require('debug')
-delete require.cache[require.resolve('debug')]
-require.cache[require.resolve('debug')] = {
-  exports: () => debugStub
-}
-require('debug')
 const wreck = require('@hapi/wreck')
 const { expect } = Code
-const { after, before, afterEach, beforeEach, describe, it } = (exports.lab = Lab.script())
+const { after, before, afterEach, describe, it } = (exports.lab = Lab.script())
 const hapiTestServer = require('./helpers/hapi-server')
 
 describe('register', () => {
@@ -92,33 +85,70 @@ describe('register', () => {
     expect(request === undefined).to.be.false()
   })
 
-  it('should log debug for response codes starting with 5', async () => {
-    process.env.DEBUG = 'hapi-gapi:*'
-    await hapiTestServer.start({
-      propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
-      sessionIdProducer: request => 'test-session',
-      trackAnalytics: () => true
-    })
-    sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
-      const msg = 'Unexpected request to the google measurement protocol api: should not send hits when trackAnalytics returns false'
-      Code.fail(msg)
-      throw new Error(msg)
-    })
-    await hapiTestServer.inject({ method: 'GET', url: '/boom' })
-    sinon.assert.calledWith(debugStub, 'Sending exception event for route %s with with status code %s')
-  })
+  describe('debug', () => {
+    const debugStub = sinon.stub()
+    require('debug')
+    delete require.cache[require.resolve('debug')]
+    require.cache[require.resolve('debug')] = {
+      exports: () => debugStub
+    }
+    require('debug')
+    require('../lib/index.js')
+    delete require.cache[require.resolve('../lib/index.js')]
+    const index = require('../lib/index.js')
 
-  it('should log a debug message if response code starting with 2 and is a page view', async () => {
-    const url = '/view'
-    const expected = `Sending analytics page-view for %s ${url}`
-    sinon.stub(wreck, 'request').resolves({ statusCode: 200 })
-    await hapiTestServer.start({
-      propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
-      sessionIdProducer: request => 'test-session',
-      trackAnalytics: () => true
+    it('should log a debug message if response code starting with 2 and is a page view', async () => {
+      process.env.DEBUG = 'hapi-gapi:*'
+      const mockServer = {
+        decorate: sinon.stub(),
+        ext: sinon.stub()
+      }
+      sinon.stub(wreck, 'request').resolves({ statusCode: 200 })
+      const extFunction = index.plugin
+      await extFunction.register(mockServer, getMockOptions())
+      await mockServer.ext.firstCall.lastArg(
+        {
+          response: {
+            statusCode: 200,
+            variety: 'view'
+          },
+          route: {
+            path: '/view'
+          },
+          ga: {
+            pageView: () => {}
+          }
+        },
+        { continue: 'continued' }
+      )
+      const expectedReturn = '/view'
+      sinon.assert.calledWith(debugStub, 'Sending analytics page-view for %s', `${expectedReturn}`)
     })
-    await hapiTestServer.inject({ method: 'GET', url })
-    sinon.assert.calledWith(debugStub, expected)
+
+    it('should log a debug message if response code starting with 5', async () => {
+      process.env.DEBUG = 'hapi-gapi:*'
+      const mockServer = {
+        decorate: sinon.stub(),
+        ext: sinon.stub()
+      }
+      sinon.stub(wreck, 'request').resolves({ statusCode: 200 })
+      const extFunction = index.plugin
+      await extFunction.register(mockServer, getMockOptions())
+      await mockServer.ext.firstCall.lastArg(
+        {
+          response: {
+            statusCode: 500
+          },
+          route: {
+            path: '/boom'
+          }
+        },
+        { continue: 'continued' }
+      )
+      const expectedPath = '/boom'
+      const expectedStatusCode = 500
+      sinon.assert.calledWith(debugStub, 'Sending exception event for route %s with with status code %s', expectedPath, expectedStatusCode)
+    })
   })
 
   describe('joi validation', async () => {
@@ -156,4 +186,10 @@ describe('register', () => {
       )
     })
   })
+})
+
+const getMockOptions = () => ({
+  propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
+  sessionIdProducer: request => 'test-session',
+  trackAnalytics: () => true
 })
