@@ -110,11 +110,20 @@ describe('register', () => {
       sinon.assert.calledWith(debugStub, 'Sending analytics page-view for %s', `${expectedReturn}`)
     })
 
-    it('should not log a debug message if response code starting with 2 and is not a page view', async () => {
+    it('should not log a debug message if response code does not start with 2 and is a page view', async statusCode => {
+      sinon.stub(wreck, 'request').resolves({ statusCode: 400 })
+      const extFunction = index.plugin
+      await extFunction.register(mockServer, getMockOptions())
+      await mockServer.ext.firstCall.lastArg(getMockRequest(400, 'view', '/view'), { continue: 'continued' })
+      const expectedReturn = '/view'
+      sinon.assert.notCalled(debugStub.withArgs('Sending analytics page-view for %s', `${expectedReturn}`))
+    })
+
+    it('should not log a debug message if response code starting with 2 and is not a page view', async statusCode => {
       sinon.stub(wreck, 'request').resolves({ statusCode: 200 })
       const extFunction = index.plugin
       await extFunction.register(mockServer, getMockOptions())
-      await mockServer.ext.firstCall.lastArg(getMockRequest(200, 'boom', '/boom'), { continue: 'continued' })
+      await mockServer.ext.firstCall.lastArg(getMockRequest(statusCode, 'boom', '/boom'), { continue: 'continued' })
       const expectedReturn = '/view'
       sinon.assert.notCalled(debugStub.withArgs('Sending analytics page-view for %s', `${expectedReturn}`))
     })
