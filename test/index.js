@@ -3,7 +3,7 @@ const Lab = require('@hapi/lab')
 const sinon = require('sinon')
 const wreck = require('@hapi/wreck')
 const { expect } = Code
-const { after, before, afterEach, describe, it } = (exports.lab = Lab.script())
+const { beforeEach, afterEach, describe, it } = (exports.lab = Lab.script())
 const hapiTestServer = require('./helpers/hapi-server')
 
 describe('register', () => {
@@ -11,22 +11,20 @@ describe('register', () => {
     sinon.restore()
   })
   describe('2xx and 5xx response codes', async () => {
-    before(async () => {
+    beforeEach(async () => {
       await hapiTestServer.start({
         propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
-        sessionIdProducer: request => 'test-session'
+        sessionIdProducer: request => 'test-session',
+        trackAnalytics: sinon.stub().resolves(true)
       })
     })
 
-    after(async () => {
+    afterEach(async () => {
       await hapiTestServer.stop()
-    })
-
-    afterEach(() => {
       sinon.restore()
     })
 
-    it('handles 2xx page views', { timeout: 3000 }, () => {
+    it('handles 2xx page views', { timeout: 3000 }, async () => {
       return new Promise(resolve => {
         sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
           expect(method).to.equal('post')
@@ -200,7 +198,7 @@ describe('register', () => {
 const getMockOptions = () => ({
   propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
   sessionIdProducer: request => 'test-session',
-  trackAnalytics: () => true
+  trackAnalytics: sinon.stub().resolves(true)
 })
 
 const getMockRequest = (statusCode = 200, variety = 'view', path = '/view') => ({
