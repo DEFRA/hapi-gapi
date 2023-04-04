@@ -12,11 +12,7 @@ describe('register', () => {
   })
   describe('2xx and 5xx response codes', async () => {
     beforeEach(async () => {
-      await hapiTestServer.start({
-        propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
-        sessionIdProducer: request => 'test-session',
-        trackAnalytics: sinon.stub().resolves(true)
-      })
+      await hapiTestServer.start(getMockOptions())
     })
 
     afterEach(async () => {
