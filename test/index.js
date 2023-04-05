@@ -169,6 +169,53 @@ describe('register', () => {
       await mockServer.ext.firstCall.lastArg(getMockRequest(400), { continue: 'continued' })
       sinon.assert.calledWith(debugStub.withArgs('Session is not being tracked'))
     })
+
+    it('should track if shouldTrack returns true', async () => {
+      const mockServer = createMockServer()
+      const request = {
+        ...getMockRequest(),
+        ga: {
+          pageView: sinon.spy()
+        }
+      }
+      const extFunction = index.plugin
+      await extFunction.register(mockServer, getMockOptions(true))
+      const onPreResponse = mockServer.ext.firstCall.lastArg
+      await onPreResponse(request, createMockToolkit())
+      expect(request.ga.pageView.callCount).to.be.equal(1)
+    })
+
+    it('should not track if shouldTrack returns false', async () => {
+      const mockServer = createMockServer()
+      const request = {
+        ...getMockRequest(),
+        ga: {
+          pageView: sinon.spy()
+        }
+      }
+      const extFunction = index.plugin
+      await extFunction.register(mockServer, getMockOptions(false))
+      const onPreResponse = mockServer.ext.firstCall.lastArg
+      await onPreResponse(request, createMockToolkit())
+      expect(request.ga.pageView.callCount).to.be.equal(0)
+    })
+
+    it('should track if shouldTrack is undefined', async () => {
+      const mockServer = createMockServer()
+      const request = {
+        ...getMockRequest(),
+        ga: {
+          pageView: sinon.spy()
+        }
+      }
+      const options = getMockOptions()
+      delete options.trackAnalytics
+      const extFunction = index.plugin
+      await extFunction.register(mockServer, options)
+      const onPreResponse = mockServer.ext.firstCall.lastArg
+      await onPreResponse(request, createMockToolkit())
+      expect(request.ga.pageView.callCount).to.be.equal(1)
+    })
   })
 
   describe('joi validation', async () => {
@@ -230,4 +277,8 @@ const getMockRequest = (statusCode = 200, variety = 'view', path = '/view') => (
 const createMockServer = () => ({
   decorate: sinon.stub(),
   ext: sinon.stub()
+})
+
+const createMockToolkit = () => ({
+  continue: Symbol('continue')
 })
