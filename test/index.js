@@ -93,6 +93,7 @@ describe('register', () => {
 
     afterEach(() => {
       debugStub.reset()
+      sinon.restore()
     })
 
     it('should log a debug message if response code starting with 2 and is a page view', async () => {
@@ -152,6 +153,16 @@ describe('register', () => {
         debugStub.withArgs('Sending exception event for route %s with with status code %s', expectedPath, expectedStatusCode)
       )
     })
+
+    it.only('should log a debug message if shouldTrack is false', async () => {
+      sinon.stub(wreck, 'request').resolves({ statusCode: 400 })
+      const extFunction = index.plugin
+      await extFunction.register(mockServer, getMockOptions(false))
+      await mockServer.ext.firstCall.lastArg(getMockRequest(400), { continue: 'continued' })
+      sinon.assert.calledWith(
+        debugStub.withArgs('Session is not being tracked')
+      )
+    })
   })
 
   describe('joi validation', async () => {
@@ -191,10 +202,10 @@ describe('register', () => {
   })
 })
 
-const getMockOptions = () => ({
+const getMockOptions = (track = true) => ({
   propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
   sessionIdProducer: request => 'test-session',
-  trackAnalytics: sinon.stub().resolves(true)
+  trackAnalytics: sinon.stub().resolves(track)
 })
 
 const getMockRequest = (statusCode = 200, variety = 'view', path = '/view') => ({
