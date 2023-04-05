@@ -91,12 +91,14 @@ describe('register', () => {
     delete require.cache[require.resolve('../lib/index.js')]
     const index = require('../lib/index.js')
 
+    beforeEach(() => {})
+
     afterEach(() => {
       debugStub.reset()
-      sinon.restore()
     })
 
     it('should log a debug message if response code starting with 2 and is a page view', async () => {
+      const mockServer = createMockServer()
       sinon.stub(wreck, 'request').resolves({ statusCode: 200 })
       const extFunction = index.plugin
       await extFunction.register(mockServer, getMockOptions())
@@ -106,6 +108,7 @@ describe('register', () => {
     })
 
     it('should not log a debug message if response code does not start with 2 and is a page view', async () => {
+      const mockServer = createMockServer()
       sinon.stub(wreck, 'request').resolves({ statusCode: 400 })
       const extFunction = index.plugin
       await extFunction.register(mockServer, getMockOptions())
@@ -115,6 +118,7 @@ describe('register', () => {
     })
 
     it('should not log a debug message if response code starting with 2 and is not a page view', async () => {
+      const mockServer = createMockServer()
       sinon.stub(wreck, 'request').resolves({ statusCode: 200 })
       const extFunction = index.plugin
       await extFunction.register(mockServer, getMockOptions())
@@ -124,6 +128,7 @@ describe('register', () => {
     })
 
     it('should not log a debug message if response code does not start with 2 and is not a page view', async () => {
+      const mockServer = createMockServer()
       sinon.stub(wreck, 'request').resolves({ statusCode: 400 })
       const extFunction = index.plugin
       await extFunction.register(mockServer, getMockOptions())
@@ -133,6 +138,7 @@ describe('register', () => {
     })
 
     it('should log a debug message if response code starting with 5', async () => {
+      const mockServer = createMockServer()
       const expectedPath = '/boom'
       const expectedStatusCode = 500
       sinon.stub(wreck, 'request').resolves({ statusCode: 500 })
@@ -143,6 +149,7 @@ describe('register', () => {
     })
 
     it('should not log a debug message if response code does not start with 5', async () => {
+      const mockServer = createMockServer()
       const expectedPath = '/view'
       const expectedStatusCode = 500
       sinon.stub(wreck, 'request').resolves({ statusCode: 400 })
@@ -154,14 +161,13 @@ describe('register', () => {
       )
     })
 
-    it.only('should log a debug message if shouldTrack is false', async () => {
+    it('should log a debug message if shouldTrack is false', async () => {
+      const mockServer = createMockServer()
       sinon.stub(wreck, 'request').resolves({ statusCode: 400 })
       const extFunction = index.plugin
       await extFunction.register(mockServer, getMockOptions(false))
       await mockServer.ext.firstCall.lastArg(getMockRequest(400), { continue: 'continued' })
-      sinon.assert.calledWith(
-        debugStub.withArgs('Session is not being tracked')
-      )
+      sinon.assert.calledWith(debugStub.withArgs('Session is not being tracked'))
     })
   })
 
@@ -205,7 +211,7 @@ describe('register', () => {
 const getMockOptions = (track = true) => ({
   propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
   sessionIdProducer: request => 'test-session',
-  trackAnalytics: sinon.stub().resolves(track)
+  trackAnalytics: sinon.fake.returns(track)
 })
 
 const getMockRequest = (statusCode = 200, variety = 'view', path = '/view') => ({
@@ -221,7 +227,7 @@ const getMockRequest = (statusCode = 200, variety = 'view', path = '/view') => (
   }
 })
 
-const mockServer = {
+const createMockServer = () => ({
   decorate: sinon.stub(),
   ext: sinon.stub()
-}
+})
