@@ -24,7 +24,7 @@ describe('register', () => {
       return new Promise(resolve => {
         sinon.stub(wreck, 'request').callsFake(async (method, url, options) => {
           expect(method).to.equal('post')
-          expect(url).to.equal('https://www.google-analytics.com/mp/collect?api_secret=undefined&measurement_id=undefined')
+          expect(url).to.equal('https://www.google-analytics.com/mp/collect?api_secret=4321&measurement_id=G-XXXXXX')
           resolve()
         })
         hapiTestServer.inject({ method: 'GET', url: '/view' })
@@ -47,7 +47,7 @@ describe('register', () => {
 
   it("doesn't track if trackAnalytics option returns false", async () => {
     await hapiTestServer.start({
-      propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
+      propertySettings: [{ id: 'G-XXXXXX', key: '5432', hitTypes: ['page_view'] }],
       sessionIdProducer: request => 'test-session',
       trackAnalytics: () => false
     })
@@ -64,7 +64,7 @@ describe('register', () => {
     })
 
     await hapiTestServer.start({
-      propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
+      propertySettings: [{ id: 'G-XXXXXX', key: '4321', hitTypes: ['page_view'] }],
       sessionIdProducer: request => 'test-session',
       trackAnalytics
     })
@@ -236,19 +236,19 @@ describe('register', () => {
     })
 
     it('requires propertySettings to contain a property with a hitTypes array containing at least 1 type', async () => {
-      await expect(hapiTestServer.start({ propertySettings: [{ id: 'G-XXXXXX-XX', hitTypes: [] }] })).reject(
+      await expect(hapiTestServer.start({ propertySettings: [{ id: 'G-XXXXXX-XX', key: '4321', hitTypes: [] }] })).reject(
         '"propertySettings[0].hitTypes" must contain at least 1 items'
       )
     })
 
     it('requires propertySettings to contain a property with a hitTypes array containing at least 1 type', async () => {
-      await expect(hapiTestServer.start({ propertySettings: [{ id: 'G-XXXXXX-XX', hitTypes: ['invalid'] }] })).reject(
+      await expect(hapiTestServer.start({ propertySettings: [{ id: 'G-XXXXXX-XX', key: '4321', hitTypes: ['invalid'] }] })).reject(
         '"propertySettings[0].hitTypes[0]" must be [page_view]'
       )
     })
 
     it('throws if session id producer function is not defined', async () => {
-      await expect(hapiTestServer.start({ propertySettings: [{ id: 'G-XXXXXX-XX', hitTypes: ['page_view'] }] })).reject(
+      await expect(hapiTestServer.start({ propertySettings: [{ id: 'G-XXXXXX-XX', key: '4321', hitTypes: ['page_view'] }] })).reject(
         '"sessionIdProducer" is required'
       )
     })
@@ -256,7 +256,7 @@ describe('register', () => {
 })
 
 const getMockOptions = (track = true) => ({
-  propertySettings: [{ id: 'G-XXXXXX', hitTypes: ['page_view'] }],
+  propertySettings: [{ id: 'G-XXXXXX', key: '4321', hitTypes: ['page_view'] }],
   sessionIdProducer: request => 'test-session',
   trackAnalytics: sinon.fake.returns(track)
 })

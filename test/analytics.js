@@ -11,7 +11,7 @@ require.cache[require.resolve('debug')] = {
 require('debug')
 const wreck = require('@hapi/wreck')
 const { expect } = require('@hapi/code')
-const { afterEach, beforeEach, describe, it } = exports.lab = Lab.script()
+const { afterEach, beforeEach, describe, it } = (exports.lab = Lab.script())
 
 const Analytics = require('../lib/analytics')
 describe('Analytics', () => {
@@ -78,10 +78,14 @@ describe('Analytics', () => {
   describe('hit', () => {
     it('should call send with the correct parameters', async () => {
       const payload = { t: 'page_view', page_view: 'True', page_title: 'page_path' }
-      const analytics = new Analytics(getSettings({ propertySettings: { id: 'G-XXXXXXX', hitTypes: ['pageview'] } }, { sessionIdProducer: '123' }))
+      const analytics = new Analytics(
+        getSettings({ propertySettings: [{ id: 'G-XXXXXXX', key: '3454534', hitTypes: ['pageview'] }] }, { sessionIdProducer: '123' })
+      )
       const sendStub = sinon.stub(analytics, 'send')
       await analytics.hit('page_view', getRequest(), payload)
-      expect(sendStub.calledWith(process.env.ANALYTICS_XGOV_PROPERTY, process.env.ANALYTICS_PROPERTY_API, 'page_path', sinon.match.string)).to.be.true()
+      expect(
+        sendStub.calledWith(analytics._propertySettings[0].id, analytics._propertySettings[0].key, 'page_path', sinon.match.string)
+      ).to.be.true()
       sendStub.restore()
     })
 
@@ -95,14 +99,18 @@ describe('Analytics', () => {
 
   describe('send', () => {
     it('should make a post request to the Google Analytics API', async () => {
-      const ANALYTICS_XGOV_PROPERTY = 'measurement_id'
-      const ANALYTICS_PROPERTY_API = 'api_secret'
-      const analytics = new Analytics(getSettings({ propertySettings: { id: 'G-XXXXXXX', hitTypes: ['pageview'] } }, { sessionIdProducer: '123' }))
+      const analytics = new Analytics(
+        getSettings({ propertySettings: { id: '234', key: 'secretshhh', hitTypes: ['pageview'] } }, { sessionIdProducer: '123' })
+      )
+      const measurementId = analytics._propertySettings.id
+      const apiSecret = analytics._propertySettings.key
       const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
-      await analytics.send('measurement_id', 'api_secret', 'page_path', 'session_id')
+      await analytics.send(measurementId, apiSecret, 'page_path', 'session_id')
       expect(wreckRequestStub.calledOnce).to.be.true()
       expect(wreckRequestStub.getCall(0).args[0]).to.equal('post')
-      expect(wreckRequestStub.getCall(0).args[1]).to.equal(`https://www.google-analytics.com/mp/collect?api_secret=${ANALYTICS_PROPERTY_API}&measurement_id=${ANALYTICS_XGOV_PROPERTY}`)
+      expect(wreckRequestStub.getCall(0).args[1]).to.equal(
+        `https://www.google-analytics.com/mp/collect?api_secret=${apiSecret}&measurement_id=${measurementId}`
+      )
       expect(wreckRequestStub.getCall(0).args[2].payload).to.include({
         user_id: 'session_id',
         events: [
@@ -121,7 +129,7 @@ describe('Analytics', () => {
 
     it('should log a message after completing the request', async () => {
       process.env.DEBUG = 'hapi-gapi:*'
-      const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', hitTypes: ['pageview'] }, '123'))
+      const analytics = new Analytics(getSettings({ id: 'G-XXXXXXX', key: '3454534', hitTypes: ['pageview'] }, '123'))
       const wreckRequestStub = sinon.stub(wreck, 'request')
       wreckRequestStub.resolves()
       await analytics.send('test-measurement-id', 'test-api-secret', 'test-page-path', 'test-session-id')
@@ -131,12 +139,11 @@ describe('Analytics', () => {
   })
 })
 
-const getSettings = ({
-  propertySettings = [],
-  id = '123'
-}) => ({
+const getSettings = ({ propertySettings = [], id = '123' }) => ({
   propertySettings,
-  sessionIdProducer: async (request) => { return id }
+  sessionIdProducer: async request => {
+    return id
+  }
 })
 const getRequest = () => ({
   route: {
