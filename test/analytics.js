@@ -59,72 +59,138 @@ describe('Analytics', () => {
     })
   })
 
-  describe('ga', () => {
-    it('should return an object with a pageView method', () => {
-      const analytics = new Analytics(getSettings({}))
-      const result = analytics.ga({})
-      expect(result).to.be.an.object()
-      expect(result.pageView).to.be.a.function()
-    })
+  describe('pageView', () => {
+    describe('posts requests to Google Analytics API', () => {
+      const measurementId = '234'
+      const apiSecret = 'secretshhh'
+      const getAnalytics = () =>
+        new Analytics(getSettings({ propertySettings: [{ id: measurementId, key: apiSecret }] }, { sessionIdProducer: () => '123' }))
 
-    it('should call hit method with correct arguments', () => {
-      const analytics = new Analytics(getSettings({}))
-      const hitSpy = sinon.spy(analytics, 'hit')
-      analytics.ga(getRequest()).pageView({ userId: '123' })
-      expect(hitSpy.calledWith('page_view', 'example_request', { t: 'page_view', userId: '123' }))
-    })
-  })
-
-  describe('hit', () => {
-    it('should call send with the correct parameters', async () => {
-      const payload = { t: 'page_view', page_view: 'True', page_title: 'page_path' }
-      const analytics = new Analytics(
-        getSettings({ propertySettings: [{ id: 'G-XXXXXXX', key: '3454534', hitTypes: ['pageview'] }] }, { sessionIdProducer: '123' })
-      )
-      const sendStub = sinon.stub(analytics, 'send')
-      await analytics.hit('page_view', getRequest(), payload)
-      expect(
-        sendStub.calledWith(analytics._propertySettings[0].id, analytics._propertySettings[0].key, 'page_path', sinon.match.string)
-      ).to.be.true()
-      sendStub.restore()
-    })
-
-    it('should stop the process return debug message if the property length is 0', async () => {
-      process.env.DEBUG = 'hapi-gapi:*'
-      const analytics = new Analytics(getSettings({ propertySettings: [] }))
-      await analytics.hit('page_view', getRequest(), {})
-      sinon.assert.calledWith(debugStub, 'No property settings')
-    })
-  })
-
-  describe('send', () => {
-    it('should make a post request to the Google Analytics API', async () => {
-      const analytics = new Analytics(
-        getSettings({ propertySettings: { id: '234', key: 'secretshhh', hitTypes: ['pageview'] } }, { sessionIdProducer: '123' })
-      )
-      const measurementId = analytics._propertySettings.id
-      const apiSecret = analytics._propertySettings.key
-      const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
-      await analytics.send(measurementId, apiSecret, 'page_path', 'session_id')
-      expect(wreckRequestStub.calledOnce).to.be.true()
-      expect(wreckRequestStub.getCall(0).args[0]).to.equal('post')
-      expect(wreckRequestStub.getCall(0).args[1]).to.equal(
-        `https://www.google-analytics.com/mp/collect?api_secret=${apiSecret}&measurement_id=${measurementId}`
-      )
-      expect(wreckRequestStub.getCall(0).args[2].payload).to.include({
-        user_id: 'session_id',
-        events: [
-          {
-            name: 'page_view',
-            params: {
-              page_view: 'True',
-              page_title: 'page_path'
-            }
-          }
-        ]
+      it('calls wreck', async () => {
+        const analytics = getAnalytics()
+        const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+        await analytics.ga(getRequest()).pageView()
+        expect(wreckRequestStub.calledOnce).to.be.true()
+        wreckRequestStub.restore()
       })
-      expect(wreckRequestStub.getCall(0).args[2].timeout).to.equal(1000)
-      wreckRequestStub.restore()
+
+      it('makes POST request', async () => {
+        const analytics = getAnalytics()
+        const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+        await analytics.ga(getRequest()).pageView()
+        expect(wreckRequestStub.firstCall.firstArg).to.equal('post')
+        wreckRequestStub.restore()
+      })
+
+      it('makes request to correct url', async () => {
+        const analytics = getAnalytics()
+        const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+        await analytics.ga(getRequest()).pageView()
+        expect(wreckRequestStub.firstCall.args[1]).to.equal(
+          `https://www.google-analytics.com/mp/collect?api_secret=${apiSecret}&measurement_id=${measurementId}`
+        )
+        wreckRequestStub.restore()
+      })
+
+      it('sends expected payload', async () => {
+        const analytics = getAnalytics()
+        const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+        await analytics.ga(getRequest()).pageView()
+        expect(wreckRequestStub.firstCall.args[2].payload).to.include({
+          user_id: '123',
+          client_id: '123',
+          events: [
+            {
+              name: 'page_view',
+              params: {
+                page_view: 'True',
+                page_title: 'page_path'
+              }
+            }
+          ]
+        })
+        wreckRequestStub.restore()
+      })
+
+      it('timeout set to one second', async () => {
+        const analytics = getAnalytics()
+        const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+        await analytics.ga(getRequest()).pageView()
+        expect(wreckRequestStub.firstCall.args[2].timeout).to.equal(1000)
+        wreckRequestStub.restore()
+      })
+    })
+
+    describe('sends a request for each property', () => {
+      const propertyIds = ['234', '123456789']
+      const apiSecrets = ['secretshhh', 'secret-squirrel']
+      const getAnalytics = () =>
+        new Analytics(
+          getSettings(
+            {
+              propertySettings: [
+                { id: propertyIds[0], key: apiSecrets[0] },
+                { id: propertyIds[1], key: apiSecrets[1] }
+              ]
+            },
+            {
+              sessionIdProducer: () => '123'
+            }
+          )
+        )
+
+      it('calls wreck twice for two properties', async () => {
+        const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+        const analytics = getAnalytics()
+        await analytics.ga(getRequest()).pageView()
+        expect(wreckRequestStub.callCount).to.equal(2)
+        wreckRequestStub.restore()
+      })
+
+      it('sends correct property id for each property', async () => {
+        const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+        const analytics = getAnalytics()
+        await analytics.ga(getRequest()).pageView()
+        for (let x = 0; x < 2; x++) {
+          const propertyId = propertyIds[x]
+          expect(wreckRequestStub.getCall(x).args[1]).to.match(new RegExp(`\\?.*measurement_id=${propertyId}.*$`))
+        }
+        wreckRequestStub.restore()
+      })
+
+      it('sends correct api secret for each property', async () => {
+        const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+        const analytics = getAnalytics()
+        await analytics.ga(getRequest()).pageView()
+        for (let x = 0; x < 2; x++) {
+          const apiSecret = apiSecrets[x]
+          expect(wreckRequestStub.getCall(x).args[1]).to.match(new RegExp(`\\?.*api_secret=${apiSecret}.*$`))
+        }
+        wreckRequestStub.restore()
+      })
+    })
+
+    describe('no property settings', () => {
+      const getAnalytics = () => new Analytics(getSettings({ propertySettings: [] }, { sessionIdProducer: () => '123' }))
+
+      beforeEach(() => {
+        debugStub.resetHistory()
+      })
+
+      it("doesn't make a request", async () => {
+        const wreckRequestStub = sinon.stub(wreck, 'request').resolves()
+        const analytics = getAnalytics()
+        await analytics.ga(getRequest()).pageView()
+        expect(wreckRequestStub.callCount).to.equal(0)
+        wreckRequestStub.restore()
+      })
+
+      it('logs a debug message', async () => {
+        const analytics = getAnalytics()
+        await analytics.ga(getRequest()).pageView()
+        console.log(debugStub.getCalls())
+        expect(debugStub.getCall(0).firstArg).to.equal('No property settings')
+      })
     })
 
     it('should log a message after completing the request', async () => {
@@ -135,6 +201,7 @@ describe('Analytics', () => {
       await analytics.send('test-measurement-id', 'test-api-secret', 'test-page-path', 'test-session-id')
 
       sinon.assert.calledWith(debugStub, 'Completed request to google analytics measurement protocol API')
+      wreckRequestStub.restore()
     })
   })
 })
