@@ -188,7 +188,6 @@ describe('Analytics', () => {
       it('logs a debug message', async () => {
         const analytics = getAnalytics()
         await analytics.ga(getRequest()).pageView()
-        console.log(debugStub.getCalls())
         expect(debugStub.getCall(0).firstArg).to.equal('No property settings')
       })
     })
