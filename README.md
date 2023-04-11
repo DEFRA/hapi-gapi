@@ -57,22 +57,15 @@ await server.register({
     sessionIdProducer: async request => {
       // Would normally use the request object to retrieve the proper session identifier
       return 'test-session'
-    },
-    attributionProducer: async request => {
-      // Would normally use the request object to return any attribution associated with the user's session. This can bee updated in the future if commercial tracking is required.
-      return {
-        // campaign events are returned in here
-      }
     }
   }
 })
 ```
 
-| Option              | Description                                                                                                                                                                                                                                       |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| propertySettings    | Defines the Google Analytics properties and the type of hits which are allowed to be sent to each. If empty, analytics data is not recorded (useful if you want to enable/disable via environment variables but still want the request decorated) |
-| sessionIdProducer   | A method to retrieve an identifier to differentiate each user session                                                                                                                                                                             |
-| attributionProducer | (Optional) A method to retrieve any attribution associated with the user session to enable campaign tracking as per https://support.google.com/analytics/answer/1033863?hl=en                                                                     |
+| Option            | Description                                                                                                                                                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| propertySettings  | Defines the Google Analytics properties and the type of hits which are allowed to be sent to each. If empty, analytics data is not recorded (useful if you want to enable/disable via environment variables but still want the request decorated) |
+| sessionIdProducer | A method to retrieve an identifier to differentiate each user session                                                                                                                                                                             |
 
 ## How to use
 
