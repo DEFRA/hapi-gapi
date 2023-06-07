@@ -34,7 +34,6 @@ describe('Analytics', () => {
 					body: "{\"client_id\":\"123\",\"user_id\":\"123\",\"events\":{\"name\":\"pageview\",\"params\":{\"page_path\":\"/test\",\"page_title\":\"test\"}}}",
 					method: 'POST'
 				})
-
 		});
 	});
 });
