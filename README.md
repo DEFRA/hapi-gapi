@@ -74,10 +74,23 @@ This plugin decorates the request object so that you can easily send data to Goo
 ### Page views
 
 ```javascript
-await request.ga.pageView()
+await request.ga.view(request)
 ```
 
 **NOTE: By default this is not necessary, the plugin will automatically send page-views by hooking into the onPreResponse lifecycle hook**
+
+
+### Events with custom params
+ You can send any custom params you need:
+```javascript
+await request.ga.view(request, {
+  name: 'score'
+  params: {
+    test: 'test',
+    page_url: request.route.url
+  }
+})
+```
 
 ## Contributing to this project
 
