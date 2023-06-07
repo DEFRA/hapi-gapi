@@ -16,14 +16,14 @@
   "keywords": [
     "hapi",
     "google",
-    "analytics"
+    "analytics",
+    "GA4"
   ],
   "author": "DEFRA",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "debug": "^4.3.1",
-    "node-fetch": "^3.3.1"
+    "debug": "^4.3.1"
   },
   "devDependencies": {
     "@hapi/hapi": "^20.1.5",
