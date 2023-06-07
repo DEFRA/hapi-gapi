@@ -4,7 +4,6 @@ const fetch = require('node-fetch')
 jest.mock('node-fetch', () => jest.fn())
 
 describe('Analytics', () => {
-
 	beforeEach(() => {
 		process.env.ANALYTICS_XGOV_PROPERTY = 'testProperty'
 		process.env.ANALYTICS_PROPERTY_API = 'testSecret'
@@ -19,7 +18,7 @@ describe('Analytics', () => {
 	describe('view', () => {
 		it('should send a view event', async () => {
 			const mockRes = { status: 204 }
-			fetch.mockImplementation(() => mockRes)
+			fetch.mockResolvedValueOnce(() => Promise.resolve|(mockRes))
 			const propertySettings = [ { id: 'testProperty', key: 'testSecret', hitTypes: [ 'pageview' ] } ]
 			const analyticsURI = `https://www.google-analytics.com/mp/collect?measurement_id=${propertySettings[ 0 ].id}&api_secret=${propertySettings[ 0 ].key}`
 			const sessionIdProducer = jest.fn(() => '123')
