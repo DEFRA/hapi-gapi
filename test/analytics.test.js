@@ -1,4 +1,3 @@
-// write a jest test for analytics.js
 const Analytics = require('../lib/analytics')
 const fetch = require('node-fetch')
 jest.mock('node-fetch', () => jest.fn())
