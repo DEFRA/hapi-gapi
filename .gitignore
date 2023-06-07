@@ -19,7 +19,6 @@ pids
 lib-cov
 test-output
 # Coverage directory used by tools like istanbul
-coverage
 *.lcov
 
 # nyc test coverage
