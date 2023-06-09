@@ -29,35 +29,13 @@ describe('Index', () => {
     })
 
     it('should initiate Analytics if the provided options are correct', async () => {
+      // const viewSpy = jest.spyOn(analytics.prototype, 'view').mockImplementation(() => Promise.resolve())
       expect(indexPlugin.plugin.register).toBeDefined()
       expect(typeof indexPlugin.plugin.register).toBe('function')
-
+      // const handler = jest.fn()
       const server = {
-        decorate: jest.fn(),
-        ext: jest.fn()
-      }
-      const options = {
-        propertySettings: [
-          {
-            key: 'superSecretKey',
-            id: 'FakeId',
-            hitTypes: ['page_view']
-          }
-        ],
-        sessionIdProducer: async request => '123'
-      }
-      await indexPlugin.plugin.register(server, options)
-      expect(server.decorate).toHaveBeenCalledTimes(1)
-      expect(server.decorate).toHaveBeenCalledWith('request', 'ga', expect.any(Function), { apply: true })
-      expect(server.ext).toHaveBeenCalledTimes(1)
-      expect(server.ext).toHaveBeenCalledWith('onPreResponse', expect.any(Function))
-    })
-
-    it('should track if trackAnalytics option is set to false', async () => {
-      const viewSpy = jest.spyOn(analytics.prototype, 'view').mockImplementation(() => Promise.resolve())
-      const server = {
-        decorate: jest.fn(),
-        ext: jest.fn()
+        decorate: jest.fn().mockImplementation(),
+        ext: jest.fn().mockImplementation()
       }
       const options = {
         trackAnalytics: async () => false,
@@ -70,8 +48,126 @@ describe('Index', () => {
         ],
         sessionIdProducer: async request => '123'
       }
+      const viewSpy = jest.fn().mockImplementation(() => Promise.resolve())
+      analytics.mockImplementation(() => {
+        return {
+          ga: {
+            view: viewSpy
+          }
+        }
+      })
+
       await indexPlugin.plugin.register(server, options)
+      expect(server.decorate).toHaveBeenCalledTimes(1)
+      expect(server.decorate).toHaveBeenCalledWith('request', 'ga', expect.any(Function), { apply: true })
+      expect(server.ext).toHaveBeenCalledTimes(1)
+      expect(server.ext).toHaveBeenCalledWith('onPreResponse', expect.any(Function))
+      expect(analytics).toHaveBeenCalledTimes(1)
+      expect(analytics).toHaveBeenCalledWith(options)
+
+      // expect(viewSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('should track if trackAnalytics option is set to true', async () => {
+      const viewSpy = jest.fn().mockImplementation(() => {
+        console.log('here: ', 'viewSpy');
+        return Promise.resolve()
+      })
+      const callback = jest.fn()
+      const options = {
+        trackAnalytics: async () => true,
+        propertySettings: [
+          {
+            key: 'superSecretKey',
+            id: 'FakeId',
+            hitTypes: ['page_view']
+          }
+        ],
+        sessionIdProducer: async request => '123'
+      }
+      const mockRequest = {
+        ga: {
+          view: viewSpy
+        },
+        response: {
+          statusCode: 204,
+          variety: 'view'
+        },
+        route: {
+          path: '/test'
+        }
+      }
+      await indexPlugin.handler(mockRequest, options, callback)
+      expect(callback).toHaveBeenCalledTimes(0)
+      expect(viewSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('should NOT track if trackAnalytics option is set to false', async () => {
+      const viewSpy = jest.fn().mockImplementation(() => {
+        console.log('here: ', 'viewSpy');
+        return Promise.resolve()
+      })
+      const callback = jest.fn()
+      const options = {
+        trackAnalytics: async () => false,
+        propertySettings: [
+          {
+            key: 'superSecretKey',
+            id: 'FakeId',
+            hitTypes: ['page_view']
+          }
+        ],
+        sessionIdProducer: async request => '123'
+      }
+      const mockRequest = {
+        ga: {
+          view: viewSpy
+        },
+        response: {
+          statusCode: 204,
+          variety: 'view'
+        },
+        route: {
+          path: '/test'
+        }
+      }
+      await indexPlugin.handler(mockRequest, options, callback)
+      expect(callback).toHaveBeenCalledTimes(0)
       expect(viewSpy).toHaveBeenCalledTimes(0)
+    })
+
+    it('should send exception event to GA on 50* responses', async () => {
+      const viewSpy = jest.fn().mockImplementation(() => {
+        console.log('here: ', 'viewSpy');
+        return Promise.resolve()
+      })
+      const callback = jest.fn()
+      const options = {
+        trackAnalytics: async () => true,
+        propertySettings: [
+          {
+            key: 'superSecretKey',
+            id: 'FakeId',
+            hitTypes: ['page_view']
+          }
+        ],
+        sessionIdProducer: async request => '123'
+      }
+      const mockRequest = {
+        ga: {
+          view: viewSpy
+        },
+        response: {
+          statusCode: 500,
+          variety: 'view'
+        },
+        route: {
+          path: '/test'
+        }
+      }
+      await indexPlugin.handler(mockRequest, options, callback)
+      expect(callback).toHaveBeenCalledTimes(0)
+      expect(viewSpy).toHaveBeenCalledTimes(1)
     })
   })
 })
