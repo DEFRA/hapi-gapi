@@ -54,5 +54,20 @@ describe('Analytics', () => {
       await analytics.view(request, params)
       expect(fetch).toHaveBeenCalledTimes(0)
     })
+
+    it('error handling', async () => {
+      fetch.mockRejectedValueOnce(new Error('A7a'))
+      const propertySettings = []
+      const sessionIdProducer = jest.fn(() => '123')
+      const analytics = new Analytics({ propertySettings, sessionIdProducer })
+
+      try {
+        await analytics.sendEvent([ {} ], '123', '123', 'sessionId');
+      } catch (e) {
+        console.log(e)
+        expect(e).toBeInstanceOf(Error)
+        expect(e.message).toBe('A7a')
+      }
+    })
   })
 })

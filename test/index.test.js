@@ -29,10 +29,8 @@ describe('Index', () => {
     })
 
     it('should initiate Analytics if the provided options are correct', async () => {
-      // const viewSpy = jest.spyOn(analytics.prototype, 'view').mockImplementation(() => Promise.resolve())
       expect(indexPlugin.plugin.register).toBeDefined()
       expect(typeof indexPlugin.plugin.register).toBe('function')
-      // const handler = jest.fn()
       const server = {
         decorate: jest.fn().mockImplementation(),
         ext: jest.fn().mockImplementation()
@@ -64,13 +62,10 @@ describe('Index', () => {
       expect(server.ext).toHaveBeenCalledWith('onPreResponse', expect.any(Function))
       expect(analytics).toHaveBeenCalledTimes(1)
       expect(analytics).toHaveBeenCalledWith(options)
-
-      // expect(viewSpy).toHaveBeenCalledTimes(1)
     })
 
     it('should track if trackAnalytics option is set to true', async () => {
       const viewSpy = jest.fn().mockImplementation(() => {
-        console.log('here: ', 'viewSpy');
         return Promise.resolve()
       })
       const callback = jest.fn()
@@ -104,7 +99,6 @@ describe('Index', () => {
 
     it('should NOT track if trackAnalytics option is set to false', async () => {
       const viewSpy = jest.fn().mockImplementation(() => {
-        console.log('here: ', 'viewSpy');
         return Promise.resolve()
       })
       const callback = jest.fn()
@@ -136,9 +130,8 @@ describe('Index', () => {
       expect(viewSpy).toHaveBeenCalledTimes(0)
     })
 
-    it('should send exception event to GA on 50* responses', async () => {
+    it('should send exception event to GA on 50X responses', async () => {
       const viewSpy = jest.fn().mockImplementation(() => {
-        console.log('here: ', 'viewSpy');
         return Promise.resolve()
       })
       const callback = jest.fn()
