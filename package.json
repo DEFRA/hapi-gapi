@@ -1,13 +1,14 @@
 {
   "name": "@defra/hapi-gapi",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "hapi plugin to enable server-side google analytics platform integration",
   "main": "lib/index.js",
   "directories": {
     "lib": "lib"
   },
   "scripts": {
-    "test": "lab -l"
+    "test": "jest --runInBand --detectOpenHandles --forceExit",
+    "test-watch": "jest . --watchAll"
   },
   "repository": {
     "type": "git",
@@ -16,28 +17,25 @@
   "keywords": [
     "hapi",
     "google",
-    "analytics"
+    "analytics",
+    "GA4"
   ],
   "author": "DEFRA",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "@hapi/wreck": "^16.0.1",
     "debug": "^4.3.1",
-    "https-proxy-agent": "^5.0.0",
-    "ip-anonymize": "^0.1.0"
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
-    "@hapi/code": "^8.0.3",
     "@hapi/hapi": "^20.1.5",
     "@hapi/inert": "^6.0.3",
-    "@hapi/lab": "^22.0.5",
     "@hapi/vision": "^6.1.0",
     "husky": "^7.0.1",
+    "jest": "^29.5.0",
     "lint-staged": "^11.1.1",
     "nunjucks": "^3.2.4",
     "prettier-standard": "^15.0.1",
-    "sinon": "^15.0.4",
     "standard": "^14.3.4"
   },
   "prettier": {
