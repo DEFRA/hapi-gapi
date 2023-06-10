@@ -18,21 +18,22 @@ describe('Index', () => {
 
   describe('register', () => {
     it('should throw an error if the provided options are invalid', async () => {
+      expect.assertions(5)
       const server = {
         decorate: jest.fn(),
         ext: jest.fn()
       }
+      expect(indexPlugin.plugin.register).toBeDefined()
+      expect(typeof indexPlugin.plugin.register).toBe('function')
 
       await expect(indexPlugin.plugin.register(server, {})).rejects.toThrow('"propertySettings" is required')
+
       expect(server.decorate).toHaveBeenCalledTimes(0)
       expect(server.ext).toHaveBeenCalledTimes(0)
     })
 
     it('should initiate Analytics - But it will not start tracking if options.trackAnalytics is set to false', async () => {
-      expect.assertions(9)
-      expect(indexPlugin.plugin.register).toBeDefined()
-      expect(typeof indexPlugin.plugin.register).toBe('function')
-
+      expect.assertions(7)
       const viewSpy = jest.fn().mockImplementation(() => {
         return Promise.resolve()
       })
@@ -83,7 +84,7 @@ describe('Index', () => {
       const server = {
         decorate: jest.fn().mockImplementation(),
         ext: jest.fn().mockImplementation(async (e, c) => {
-          await c(r, { continue: "This is the best mock I ever wrote!" })
+          await c(r, { continue: "I bet no one will read this!" })
         })
       }
       const options = {
@@ -127,7 +128,7 @@ describe('Index', () => {
       const server = {
         decorate: jest.fn().mockImplementation(),
         ext: jest.fn().mockImplementation(async (_e, c) => {
-          await c(r, { continue: "This is the best mock I ever wrote!" })
+          await c(r, { continue: "shame!" })
         })
       }
       const options = {
