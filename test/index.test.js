@@ -17,12 +17,31 @@ describe('Index', () => {
   })
 
   describe('register', () => {
+    const viewSpy = jest.fn().mockImplementation(() => {
+      return Promise.resolve()
+    })
+    const options = {
+      trackAnalytics: async () => false,
+      propertySettings: [
+        {
+          key: 'superSecretKey',
+          id: 'FakeId',
+          hitTypes: ['page_view']
+        }
+      ],
+      sessionIdProducer: async request => '123'
+    }
+    const r = { response: { statusCode: 204, variety: 'view' }, route: { path: '/test', fingerprint: 'A7a' }, ga: { view: viewSpy } }
+    const server = {
+      decorate: jest.fn().mockImplementation(),
+      ext: jest.fn().mockImplementation(async (_e, c) => {
+        await c(r, { continue: "shame!" })
+      })
+    }
+
     it('should throw an error if the provided options are invalid', async () => {
       expect.assertions(5)
-      const server = {
-        decorate: jest.fn(),
-        ext: jest.fn()
-      }
+
       expect(indexPlugin.plugin.register).toBeDefined()
       expect(typeof indexPlugin.plugin.register).toBe('function')
 
@@ -34,27 +53,7 @@ describe('Index', () => {
 
     it('should initiate Analytics - But it will not start tracking if options.trackAnalytics is set to false', async () => {
       expect.assertions(7)
-      const viewSpy = jest.fn().mockImplementation(() => {
-        return Promise.resolve()
-      })
-      const r = { response: { statusCode: 204, variety: 'view' }, route: { path: '/test', fingerprint: 'A7a' }, ga: { view: viewSpy } }
-      const server = {
-        decorate: jest.fn().mockImplementation(),
-        ext: jest.fn().mockImplementation(async (e, c) => {
-          await c(r, { continue: "This is the best mock I ever wrote!" })
-        })
-      }
-      const options = {
-        trackAnalytics: async () => false,
-        propertySettings: [
-          {
-            key: 'superSecretKey',
-            id: 'FakeId',
-            hitTypes: ['page_view']
-          }
-        ],
-        sessionIdProducer: async request => '123'
-      }
+
       analytics.mockImplementation(() => {
         return {
           ga: jest.fn().mockResolvedValueOnce({ view: viewSpy }),
@@ -73,31 +72,15 @@ describe('Index', () => {
     })
 
     it('should initiate Analytics if the provided options are valid - and start tracking page views', async () => {
-      expect.assertions(10)
-      expect(indexPlugin.plugin.register).toBeDefined()
-      expect(typeof indexPlugin.plugin.register).toBe('function')
+      expect.assertions(8)
 
-      const viewSpy = jest.fn().mockImplementation(() => {
-        return Promise.resolve()
-      })
-      const r = { response: { statusCode: 204, variety: 'view' }, route: { path: '/test', fingerprint: 'A7a' }, ga: { view: viewSpy } }
       const server = {
         decorate: jest.fn().mockImplementation(),
         ext: jest.fn().mockImplementation(async (e, c) => {
           await c(r, { continue: "I bet no one will read this!" })
         })
       }
-      const options = {
-        trackAnalytics: async () => true,
-        propertySettings: [
-          {
-            key: 'superSecretKey',
-            id: 'FakeId',
-            hitTypes: ['page_view']
-          }
-        ],
-        sessionIdProducer: async request => '123'
-      }
+      options.trackAnalytics = async () => true
       analytics.mockImplementation(() => {
         return {
           ga: jest.fn().mockResolvedValueOnce({ view: viewSpy }),
@@ -116,32 +99,16 @@ describe('Index', () => {
       expect(viewSpy).toHaveBeenCalledWith(r, { name: "pageview", params: { page_path: "/test", page_title: "A7a" } })
     })
     it('should send exception event to GA on internal server errors 50X', async () => {
-      expect.assertions(10)
-      expect(indexPlugin.plugin.register).toBeDefined()
-      expect(typeof indexPlugin.plugin.register).toBe('function')
+      expect.assertions(8)
 
-      const viewSpy = jest.fn().mockImplementation(() => {
-        return Promise.resolve()
-      })
-
-      const r = { response: { statusCode: 500, variety: 'view' }, route: { path: '/test', fingerprint: 'A7a' }, ga: { view: viewSpy } }
+      r.response.statusCode = 500
       const server = {
         decorate: jest.fn().mockImplementation(),
         ext: jest.fn().mockImplementation(async (_e, c) => {
           await c(r, { continue: "shame!" })
         })
       }
-      const options = {
-        trackAnalytics: async () => true,
-        propertySettings: [
-          {
-            key: 'superSecretKey',
-            id: 'FakeId',
-            hitTypes: ['page_view']
-          }
-        ],
-        sessionIdProducer: async request => '123'
-      }
+      options.trackAnalytics = async () => true
       analytics.mockImplementation(() => {
         return {
           ga: jest.fn().mockResolvedValueOnce({ view: viewSpy }),
