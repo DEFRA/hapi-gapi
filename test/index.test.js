@@ -35,7 +35,7 @@ describe('Index', () => {
     const server = {
       decorate: jest.fn().mockImplementation(),
       ext: jest.fn().mockImplementation(async (_e, c) => {
-        await c(r, { continue: "shame!" })
+        await c(r, { continue: "This is the best mock I ever wrote!" })
       })
     }
 
