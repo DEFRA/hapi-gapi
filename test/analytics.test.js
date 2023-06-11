@@ -36,13 +36,15 @@ describe('Analytics', () => {
       const analytics = new Analytics({ propertySettings, sessionIdProducer })
 
       await analytics.view(request, metrics)
-      expect(axios).toHaveBeenCalledWith(
-        analyticsURI,
-        {
+      expect(axios).toHaveBeenCalledWith({
+        url: analyticsURI,
+        method: 'post',
+        data: {
           client_id: '123',
           user_id: '123',
           events: [{ name: 'pageview', params: { page_path: '/test', page_title: 'test' } }],
-        })
+        }
+      })
       expect(logSpy).toHaveBeenCalledTimes(1)
       expect(logSpy.mock.calls[0]).toStrictEqual(["Completed request to google analytics measurement protocol API", 204, 'OK'])
     })
@@ -72,20 +74,22 @@ describe('Analytics', () => {
       const measurementId = 'your-measurement-id';
       const apiSecret = 'your-api-secret';
       const sessionId = 'your-session-id';
-
-      const propertySettings = [{ id: 'testProperty', key: 'testSecret', hitTypes: ['pageview'] }]
+      
+      const propertySettings = [{ id: measurementId, key: apiSecret, hitTypes: ['pageview'] }]
+      const analyticsURI = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`
       const sessionIdProducer = jest.fn(() => '123')
       const analytics = new Analytics({ propertySettings, sessionIdProducer })
 
       await analytics.sendEvent(events, measurementId, apiSecret, sessionId);
-      expect(axios).toHaveBeenCalledWith(
-        'https://www.google-analytics.com/mp/collect?measurement_id=your-measurement-id&api_secret=your-api-secret',
-        {
-          client_id: 'your-session-id',
-          user_id: 'your-session-id',
+      expect(axios).toHaveBeenCalledWith({
+        url: analyticsURI,
+        method: 'post',
+        data: {
+          client_id: sessionId,
+          user_id: sessionId,
           events: ['event1', 'event2'],
         }
-      );
+      })
       expect(logSpy).toHaveBeenCalledTimes(1);
       expect(logSpy).toHaveBeenCalledWith(
         'Completed request to google analytics measurement protocol API',
@@ -103,19 +107,21 @@ describe('Analytics', () => {
       const apiSecret = 'your-api-secret';
       const sessionId = 'your-session-id';
 
-      const propertySettings = [{ id: 'testProperty', key: 'testSecret', hitTypes: ['pageview'] }]
+      const propertySettings = [{ id: measurementId, key: apiSecret, hitTypes: ['pageview'] }]
+      const analyticsURI = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`
       const sessionIdProducer = jest.fn(() => '123')
       const analytics = new Analytics({ propertySettings, sessionIdProducer })
 
       await analytics.sendEvent(events, measurementId, apiSecret, sessionId);
-      expect(axios).toHaveBeenCalledWith(
-        'https://www.google-analytics.com/mp/collect?measurement_id=your-measurement-id&api_secret=your-api-secret',
-        {
-          client_id: 'your-session-id',
-          user_id: 'your-session-id',
+      expect(axios).toHaveBeenCalledWith({
+        url: analyticsURI,
+        method: 'post',
+        data: {
+          client_id: sessionId,
+          user_id: sessionId,
           events: ['event1', 'event2'],
         }
-      );
+      })
       expect(logSpy).toHaveBeenCalledTimes(1);
       expect(logSpy).toHaveBeenCalledWith("Error sending GA request:", { "response": { "status": 404, "statusText": "Not Found" } });
     });
