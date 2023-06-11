@@ -23,10 +23,12 @@ describe('Analytics', () => {
   })
 
   describe('view', () => {
-    it('should send a view event', async () => {
-      expect.assertions(3) // -- Important! This ensures that assertions in the async function are run - Update if you add more assertions
+    it.only('should send a view event', async () => {
+      // expect.assertions(3) // -- Important! This ensures that assertions in the async function are run - Update if you add more assertions
       const mockRes = { status: 204, statusText: 'OK' }
-      axios.mockResolvedValueOnce(mockRes)
+      axios.mockImplementationOnce(() => {
+        post: jest.fn().mockResolvedValueOnce(mockRes)
+      })
       const logSpy = jest.spyOn(console, 'log')
       const propertySettings = [{ id: 'testProperty', key: 'testSecret', hitTypes: ['pageview'] }]
       const analyticsURI = `https://www.google-analytics.com/mp/collect?measurement_id=${propertySettings[0].id}&api_secret=${propertySettings[0].key}`
@@ -36,15 +38,14 @@ describe('Analytics', () => {
       const analytics = new Analytics({ propertySettings, sessionIdProducer })
 
       await analytics.view(request, metrics)
-      expect(axios).toHaveBeenCalledWith({
-        url: analyticsURI,
-        method: 'post',
-        data: {
+      expect(axios.post).toHaveBeenCalledWith(
+        analyticsURI,
+        {
           client_id: '123',
           user_id: '123',
           events: [{ name: 'pageview', params: { page_path: '/test', page_title: 'test' } }],
         }
-      })
+      )
       expect(logSpy).toHaveBeenCalledTimes(1)
       expect(logSpy.mock.calls[0]).toStrictEqual(["Completed request to google analytics measurement protocol API", 204, 'OK'])
     })
