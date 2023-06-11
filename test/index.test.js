@@ -1,7 +1,7 @@
 
 const indexPlugin = require('../lib/index')
 const analytics = require('../lib/analytics')
-jest.mock('node-fetch', () => jest.fn())
+jest.mock('axios')
 jest.mock('../lib/analytics')
 
 describe('Index', () => {
