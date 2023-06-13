@@ -25,12 +25,10 @@ describe('Analytics', () => {
   })
 
   describe('view', () => {
-    it.skip('should send a view event', async () => {
-      // expect.assertions(3) // -- Important! This ensures that assertions in the async function are run - Update if you add more assertions
+    it('should send a view event', async () => {
+      expect.assertions(3) // -- Important! This ensures that assertions in the async function are run - Update if you add more assertions
       const mockRes = { status: 204, statusText: 'OK' }
-      fetch.mockImplementationOnce(() => {
-        post: jest.fn().mockResolvedValueOnce(mockRes)
-      })
+      fetch.mockResolvedValueOnce(mockRes)
       const logSpy = jest.spyOn(console, 'log')
       const propertySettings = [{ id: 'testProperty', key: 'testSecret', hitTypes: ['pageview'] }]
       const analyticsURI = `https://www.google-analytics.com/mp/collect?measurement_id=${propertySettings[0].id}&api_secret=${propertySettings[0].key}`
@@ -43,19 +41,22 @@ describe('Analytics', () => {
       expect(fetch).toHaveBeenCalledWith(
         analyticsURI,
         {
-          client_id: '123',
-          user_id: '123',
-          events: [{ name: 'pageview', params: { page_path: '/test', page_title: 'test' } }],
+          body: JSON.stringify({
+            client_id: '123',
+            user_id: '123',
+            events: [{ name: 'pageview', params: { page_path: '/test', page_title: 'test' } }],
+          }),
+          method: 'POST'
         }
       )
       expect(logSpy).toHaveBeenCalledTimes(1)
       expect(logSpy.mock.calls[0]).toStrictEqual(["Completed request to google analytics measurement protocol API", 204, 'OK'])
     })
 
-    it.skip('should NOT send an event if propertySettings are missing', async () => {
+    it('should NOT send an event if propertySettings are missing', async () => {
       expect.assertions(1)
       const mockRes = { status: 204 }
-      axios.mockResolvedValueOnce(mockRes)
+      fetch.mockResolvedValueOnce(mockRes)
       const propertySettings = []
       const sessionIdProducer = jest.fn(() => '123')
       const events = [{ name: 'pageview', params: { page_path: '/test', page_title: 'test' } }]
@@ -63,36 +64,38 @@ describe('Analytics', () => {
       const analytics = new Analytics({ propertySettings, sessionIdProducer })
 
       await analytics.view(request, events)
-      expect(axios).toHaveBeenCalledTimes(0)
+      expect(fetch).toHaveBeenCalledTimes(0)
     })
   })
 
   describe('sendEvent', () => {
-    it.skip('should send an event to Google Analytics', async () => {
+    const events = ['event1', 'event2'];
+    const measurementId = 'your-measurement-id';
+    const apiSecret = 'your-api-secret';
+    const sessionId = 'your-session-id';
+    const sessionIdProducer = jest.fn(() => '123')
+    const propertySettings = [{ id: measurementId, key: apiSecret, hitTypes: ['pageview'] }]
+    const analyticsURI = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`
+    it('should send an event to Google Analytics', async () => {
       expect.assertions(3)
       const mockRes = { status: 204, statusText: 'OK' }
-      axios.mockResolvedValueOnce(mockRes)
+      fetch.mockResolvedValueOnce(mockRes)
       const logSpy = jest.spyOn(console, 'log')
-      const events = ['event1', 'event2'];
-      const measurementId = 'your-measurement-id';
-      const apiSecret = 'your-api-secret';
-      const sessionId = 'your-session-id';
-      
-      const propertySettings = [{ id: measurementId, key: apiSecret, hitTypes: ['pageview'] }]
-      const analyticsURI = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`
-      const sessionIdProducer = jest.fn(() => '123')
+
       const analytics = new Analytics({ propertySettings, sessionIdProducer })
 
       await analytics.sendEvent(events, measurementId, apiSecret, sessionId);
-      expect(axios).toHaveBeenCalledWith({
-        url: analyticsURI,
-        method: 'post',
-        data: {
-          client_id: sessionId,
-          user_id: sessionId,
-          events: ['event1', 'event2'],
+      expect(fetch).toHaveBeenCalledWith(
+        analyticsURI,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            client_id: sessionId,
+            user_id: sessionId,
+            events: ['event1', 'event2'],
+          })
         }
-      })
+      )
       expect(logSpy).toHaveBeenCalledTimes(1);
       expect(logSpy).toHaveBeenCalledWith(
         'Completed request to google analytics measurement protocol API',
@@ -101,30 +104,25 @@ describe('Analytics', () => {
       );
     });
 
-    it.skip('error handling', async () => {
+    it('error handling', async () => {
       expect.assertions(3)
-      axios.mockRejectedValueOnce({ response: { status: 404, statusText: 'Not Found' } });
-      const logSpy = jest.spyOn(console, 'log')
-      const events = ['event1', 'event2'];
-      const measurementId = 'your-measurement-id';
-      const apiSecret = 'your-api-secret';
-      const sessionId = 'your-session-id';
+      fetch.mockRejectedValueOnce({ response: { status: 404, statusText: 'Not Found' } });
+      const logSpy = jest.spyOn(console, 'error')
 
-      const propertySettings = [{ id: measurementId, key: apiSecret, hitTypes: ['pageview'] }]
-      const analyticsURI = `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`
-      const sessionIdProducer = jest.fn(() => '123')
       const analytics = new Analytics({ propertySettings, sessionIdProducer })
 
       await analytics.sendEvent(events, measurementId, apiSecret, sessionId);
-      expect(axios).toHaveBeenCalledWith({
-        url: analyticsURI,
-        method: 'post',
-        data: {
-          client_id: sessionId,
-          user_id: sessionId,
-          events: ['event1', 'event2'],
+      expect(fetch).toHaveBeenCalledWith(
+        analyticsURI,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            client_id: sessionId,
+            user_id: sessionId,
+            events: ['event1', 'event2'],
+          })
         }
-      })
+      )
       expect(logSpy).toHaveBeenCalledTimes(1);
       expect(logSpy).toHaveBeenCalledWith("Error sending GA request:", { "response": { "status": 404, "statusText": "Not Found" } });
     });
