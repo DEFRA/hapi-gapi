@@ -1,0 +1,27 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
+  ignore:
+  - dependency-name: husky
+    versions:
+    - 4.3.8
+    - 5.0.9
+    - 5.1.0
+    - 5.1.2
+    - 5.1.3
+    - 5.2.0
+  - dependency-name: "@hapi/hapi"
+    versions:
+    - 20.0.3
+    - 20.1.0
+  - dependency-name: sinon
+    versions:
+    - 9.2.4
+  - dependency-name: lint-staged
+    versions:
+    - 10.5.3
